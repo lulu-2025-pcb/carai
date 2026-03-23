@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202603230739 -->
+<!-- v202603230741 -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -596,8 +596,8 @@ function renderAll(d) {
   var verdictText=d.VERDICT||"分析完成";
   var verdict=vi(color)+" "+xe(verdictText);
 
-  document.getElementById("fV").innerHTML=verdict;
-  document.getElementById("fV").className="b1-verdict "+vc(color,verdictText);
+  var fVel=document.getElementById("fV");
+  if(fVel){fVel.innerHTML=verdict;fVel.className="b1-verdict "+vc(color,verdictText);}
   var totalIssues = (d.safety_issues||[]).length + (d.cost_issues||[]).length + (d.resale_issues||[]).length;
   var issueCount = d.ISSUE_COUNT || (totalIssues > 0 ? String(totalIssues) : "0");
   document.getElementById("fN").textContent=issueCount+" 个（影响价格）";
@@ -618,9 +618,9 @@ function renderAll(d) {
   // 去掉具体数字，只保留定性描述
   costRisk = costRisk.replace(/\d+[-~]\d+元/g,"有风险").replace(/\d+元/g,"有风险").replace(/\d+万/g,"有风险");
   priceSaving = priceSaving.replace(/可少付约?\d+[-~]?\d*元/g,"有空间，解锁查看").replace(/可少付约?\d+[-~]?\d*万/g,"有空间，解锁查看").replace(/\d+[-~]\d+元/g,"有空间").replace(/\d+万/g,"有空间");
-  document.getElementById("dC").textContent=costRisk;
-  document.getElementById("dS").textContent=priceSaving;
-  document.getElementById("dN").textContent=(d.ISSUE_COUNT||"0")+" 个";
+  var dCel=document.getElementById("dC");if(dCel)dCel.textContent=costRisk;
+  var dSel=document.getElementById("dS");if(dSel)dSel.textContent=priceSaving;
+  var dNel=document.getElementById("dN");if(dNel)dNel.textContent=(d.ISSUE_COUNT||"0")+" 个";
   document.getElementById("dDims").innerHTML=deepDims(d);
 
   // verdict title removed from 199 page
@@ -672,7 +672,7 @@ function renderAll(d) {
   if (qv) {
     var vt = d.VERDICT||"建议放弃";
     qv.innerHTML = "❌ " + xe(vt);
-    document.getElementById("quitSub").textContent = d.VERDICT_SUB||"";
+    var qSel=document.getElementById("quitSub");if(qSel)qSel.textContent = d.VERDICT_SUB||"";
     // Build quit reasons from safety/cost issues
     var reasons = "";
     (d.safety_issues||[]).forEach(function(issue){ if(issue.tag==="关键") reasons += "· "+xe(issue.name)+"："+xe(issue.meaning)+"<br>"; });
