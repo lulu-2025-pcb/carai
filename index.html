@@ -560,6 +560,54 @@ function renderAll(d) {
   document.getElementById("fullQuits").innerHTML=qh;
 }
 
+
+async function sliceImage(file, maxSliceH) {
+  return new Promise(function(resolve) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var img = new Image();
+      img.onload = function() {
+        var w = img.width;
+        var h = img.height;
+        if (h <= maxSliceH * 1.5) {
+          var canvas = document.createElement("canvas");
+          var maxW = 1200;
+          var sw = w, sh = h;
+          if (sw > maxW) { sh = Math.round(sh * maxW / sw); sw = maxW; }
+          canvas.width = sw; canvas.height = sh;
+          canvas.getContext("2d").drawImage(img, 0, 0, sw, sh);
+          canvas.toBlob(function(blob) {
+            resolve([new File([blob], file.name, { type: "image/jpeg" })]);
+          }, "image/jpeg", 0.85);
+          return;
+        }
+        var slices = Math.ceil(h / maxSliceH);
+        var results = [];
+        var done = 0;
+        for (var i = 0; i < slices; i++) {
+          (function(idx) {
+            var sy = idx * maxSliceH;
+            var sh2 = Math.min(maxSliceH, h - sy);
+            var maxW2 = 1200;
+            var sw2 = w, scaledH = sh2;
+            if (sw2 > maxW2) { scaledH = Math.round(sh2 * maxW2 / sw2); sw2 = maxW2; }
+            var canvas2 = document.createElement("canvas");
+            canvas2.width = sw2; canvas2.height = scaledH;
+            canvas2.getContext("2d").drawImage(img, 0, sy, w, sh2, 0, 0, sw2, scaledH);
+            canvas2.toBlob(function(blob) {
+              results[idx] = new File([blob], "slice_" + idx + ".jpg", { type: "image/jpeg" });
+              done++;
+              if (done === slices) resolve(results);
+            }, "image/jpeg", 0.85);
+          })(i);
+        }
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 async function compressImage(file, maxSizeKB) {
   return new Promise(function(resolve) {
     var reader = new FileReader();
@@ -599,6 +647,57 @@ async function compressImage(file, maxSizeKB) {
   });
 }
 
+
+// 把一张图片切割成多块，每块高度不超过maxSliceH像素
+async function sliceImage(file, maxSliceH) {
+  return new Promise(function(resolve) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var img = new Image();
+      img.onload = function() {
+        var w = img.width;
+        var h = img.height;
+        // 如果图片不是长图，直接压缩返回
+        if (h <= maxSliceH * 1.5) {
+          var canvas = document.createElement("canvas");
+          var maxW = 1200;
+          var sw = w, sh = h;
+          if (sw > maxW) { sh = Math.round(sh * maxW / sw); sw = maxW; }
+          canvas.width = sw; canvas.height = sh;
+          canvas.getContext("2d").drawImage(img, 0, 0, sw, sh);
+          canvas.toBlob(function(blob) {
+            resolve([new File([blob], file.name, { type: "image/jpeg" })]);
+          }, "image/jpeg", 0.85);
+          return;
+        }
+        // 长图：切成多块
+        var slices = Math.ceil(h / maxSliceH);
+        var results = [];
+        var done = 0;
+        for (var i = 0; i < slices; i++) {
+          (function(idx) {
+            var sy = idx * maxSliceH;
+            var sh = Math.min(maxSliceH, h - sy);
+            // 按宽度等比缩放，最大1200px
+            var maxW = 1200;
+            var sw = w, scaledH = sh;
+            if (sw > maxW) { scaledH = Math.round(sh * maxW / sw); sw = maxW; }
+            var canvas = document.createElement("canvas");
+            canvas.width = sw; canvas.height = scaledH;
+            canvas.getContext("2d").drawImage(img, 0, sy, w, sh, 0, 0, sw, scaledH);
+            canvas.toBlob(function(blob) {
+              results[idx] = new File([blob], file.name.replace(/\./, "_" + idx + "."), { type: "image/jpeg" });
+              done++;
+              if (done === slices) resolve(results);
+            }, "image/jpeg", 0.85);
+          })(i);
+        }
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 async function compressImage(file, maxSizeKB) {
   return new Promise(function(resolve) {
@@ -643,11 +742,13 @@ async function startAnalyze() {
   try {
     var fd=new FormData();
     if (uploadedFiles.length > 0) {
-      // Compress images before upload (max 400KB each)
-      var compressed = await Promise.all(uploadedFiles.map(function(f) {
-        return compressImage(f, 400);
-      }));
-      compressed.forEach(function(f, i) { fd.append("file_" + i, f); });
+      // 切割长图后上传，每块高度1200px
+      var allSlices = [];
+      for (var fi = 0; fi < uploadedFiles.length; fi++) {
+        var slices = await sliceImage(uploadedFiles[fi], 1200);
+        allSlices = allSlices.concat(slices);
+      }
+      allSlices.forEach(function(f, i) { fd.append("file_" + i, f); });
     }
     var txt=pasteText;
     if (price) txt="当前报价："+price+"万元\n"+txt;
