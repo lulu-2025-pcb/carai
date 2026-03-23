@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v202603230739 -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -629,13 +630,13 @@ function renderAll(d) {
   var fullFromEl=document.getElementById("fullFrom");
   if(fullFromEl) fullFromEl.textContent=d.PRICE_FROM||d.price_from||"-";
   document.getElementById("fullP").textContent=d.SUGGEST_PRICE||"-";
-  document.getElementById("fullR").textContent="合理区间 "+(d.MARKET_RANGE||"-")+" · 卖家报价 "+(d.PRICE_FROM||"-");
+  // fullR removed
 
   var dh="<div class='ph-row'><span class='ph-item'>卖家报价</span><span class='ph-red'>"+xe(d.PRICE_FROM||"-")+"</span></div>";
   (d.deducts||[]).forEach(function(item){
     dh+="<div class='ph-row'><span class='ph-item'>"+xe(item.label)+"</span><span class='ph-amber'>"+xe(item.amount)+"</span></div>";
   });
-  document.getElementById("fullD").innerHTML=dh;
+  // fullD removed
   document.getElementById("fullDims").innerHTML=fullDims(d);
 
   var th="";
