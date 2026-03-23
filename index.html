@@ -307,7 +307,7 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f1f1f1;color
 <div class="page" id="p3">
   <div class="blk1">
     <div class="b1-eye">AI 购车分析 · ¥19.9 已解锁</div>
-    <div class="b1-verdict v-amber" id="dV">分析中...</div>
+    <div style="font-size:13px;color:rgba(255,255,255,.45);margin-bottom:12px;" id="dVsub">这些问题，你该担心多少？</div>
     <div class="b1-rows">
       <div class="b1-row"><span class="b1-label">后期养车：比同类车</span><span class="b1-val v-red" id="dC">-</span></div>
       <div class="b1-row"><span class="b1-label">这次买车：存在议价空间</span><span class="b1-val v-amber" id="dS">-</span></div>
@@ -359,20 +359,14 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f1f1f1;color
 <div class="page" id="p4">
   <div class="blk1">
     <div class="b1-eye">AI 完整决策方案 · ¥199 已解锁</div>
-    <div class="b1-verdict v-green" id="fullV">分析中...</div>
-    <div class="b1-sub" id="fullSub"></div>
+    <div class="b1-sub" id="fullSub" style="font-size:14px;color:rgba(255,255,255,.5);margin-bottom:4px;"></div>
     <div class="b1-rows">
-      <div class="b1-row"><span class="b1-label">后期养车：比同类车多花</span><span class="b1-val v-red" id="fullC">-</span></div>
-      <div class="b1-row"><span class="b1-label">这次买车：可以少付</span><span class="b1-val v-green" id="fullS">-</span></div>
+      <div class="b1-row"><span class="b1-label">卖家报价</span><span class="b1-val v-red" id="fullFrom">-</span></div>
+      <div class="b1-row"><span class="b1-label">建议成交价</span><span class="b1-val v-green" id="fullP">-</span></div>
+      <div class="b1-row"><span class="b1-label">后期养车多花</span><span class="b1-val v-red" id="fullC">-</span></div>
     </div>
   </div>
-  <div class="price-hero">
-    <div class="ph-label">🎯 建议成交价</div>
-    <div class="ph-price" id="fullP">-</div>
-    <div class="ph-range" id="fullR">-</div>
-    <div class="ph-divider"></div>
-    <div class="ph-breakdown" id="fullD"></div>
-  </div>
+
   <div class="blk2" id="fullDims"></div>
   <div id="fullTalks"></div>
   <div id="fullActions"></div>
@@ -488,7 +482,10 @@ function freeDims(d) {
     h+="<div style='width:30px;height:30px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;font-weight:700;color:#374151;'>"+dim.num+"</div>";
     h+="<div style='font-size:18px;font-weight:700;color:#111;'>"+xe(dim.q)+"</div>";
     h+="</div>";
-    h+="<span style='font-size:13px;padding:3px 12px;border-radius:20px;white-space:nowrap;"+badgeColor+"'>"+xe(dim.lb)+"</span>";
+    // Show issue count badge for dims that have issues (except dim 4)
+    var issueCount = dim.issues ? dim.issues.length : 0;
+    var badgeText = dim.lb;
+    h+="<span style='font-size:13px;padding:3px 12px;border-radius:20px;white-space:nowrap;"+badgeColor+"'>"+xe(badgeText)+"</span>";
     h+="</div>";
     h+="<div style='padding:2px 16px 14px 58px;font-size:15px;color:#9ca3af;'>"+xe(dim.sub)+"</div>";
     h+="</div>";
@@ -600,7 +597,9 @@ function renderAll(d) {
 
   document.getElementById("fV").innerHTML=verdict;
   document.getElementById("fV").className="b1-verdict "+vc(color,verdictText);
-  document.getElementById("fN").textContent=(d.ISSUE_COUNT||"0")+" 个（影响价格）";
+  var totalIssues = (d.safety_issues||[]).length + (d.cost_issues||[]).length + (d.resale_issues||[]).length;
+  var issueCount = d.ISSUE_COUNT || (totalIssues > 0 ? String(totalIssues) : "0");
+  document.getElementById("fN").textContent=issueCount+" 个（影响价格）";
   var hookEl=document.getElementById("fHook");
   if(hookEl){hookEl.textContent=(d.VERDICT_COLOR==="red")?"⚠️ 这车建议放弃":"⚠️ 这车可能不止表面价格";}
   var fCel=document.getElementById("fC");
@@ -609,8 +608,9 @@ function renderAll(d) {
   if(fSel){fSel.textContent=d.PRICE_TEXT||"存在（需专业判断）";}
   document.getElementById("fDims").innerHTML=freeDims(d);
 
-  document.getElementById("dV").innerHTML=verdict;
-  document.getElementById("dV").className="b1-verdict "+vc(color,verdictText);
+  // verdict title removed from 19.9 page
+  var dVsub = document.getElementById("dVsub");
+  if(dVsub) dVsub.textContent = d.VERDICT_SUB || "报告解读已完成";
   // 19.9版只显示定性描述，不显示具体金额
   var costRisk = d.COST_RISK||"有额外支出风险";
   var priceSaving = d.PRICE_SAVING||"明显，但需要依据";
@@ -622,11 +622,12 @@ function renderAll(d) {
   document.getElementById("dN").textContent=(d.ISSUE_COUNT||"0")+" 个";
   document.getElementById("dDims").innerHTML=deepDims(d);
 
-  document.getElementById("fullV").innerHTML=verdict;
-  document.getElementById("fullV").className="b1-verdict "+vc(color,verdictText);
+  // verdict title removed from 199 page
   document.getElementById("fullSub").textContent=d.VERDICT_SUB||"";
-  document.getElementById("fullC").textContent=d.COST_RISK||"-";
-  document.getElementById("fullS").textContent=d.PRICE_SAVING||"-";
+  // 199 header rows
+  document.getElementById("fullC").textContent=d.COST_SUB||d.COST_RISK||"-";
+  var fullFromEl=document.getElementById("fullFrom");
+  if(fullFromEl) fullFromEl.textContent=d.PRICE_FROM||d.price_from||"-";
   document.getElementById("fullP").textContent=d.SUGGEST_PRICE||"-";
   document.getElementById("fullR").textContent="合理区间 "+(d.MARKET_RANGE||"-")+" · 卖家报价 "+(d.PRICE_FROM||"-");
 
