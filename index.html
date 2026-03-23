@@ -175,7 +175,7 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f1f1f1;color
       </div>
     </div>
     <div class="upbox">
-      <input type="file" id="fileInput" accept="image/*">
+      <input type="file" id="fileInput" accept="image/*" multiple>
       <div class="ucircle">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -359,7 +359,7 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f1f1f1;color
 // ★ 把这里改成你的 Worker 地址
 var API = "https://carai.luluzhaos.workers.dev/analyze";
 
-var uploadedFile = null;
+var uploadedFiles = [];
 var RES = {};
 
 function go(id) {
@@ -375,9 +375,9 @@ document.addEventListener("click", function(e) {
 
 document.getElementById("analyzeBtn").addEventListener("click", startAnalyze);
 document.getElementById("fileInput").addEventListener("change", function() {
-  if (this.files[0]) {
-    uploadedFile = this.files[0];
-    document.getElementById("uploadSub").textContent = "已选择：" + this.files[0].name;
+  if (this.files.length > 0) {
+    uploadedFiles = Array.from(this.files);
+    document.getElementById("uploadSub").textContent = "已选择 " + this.files.length + " 张图片";
   }
 });
 
@@ -505,8 +505,14 @@ function renderAll(d) {
 
   document.getElementById("dV").innerHTML=verdict;
   document.getElementById("dV").className="b1-verdict "+vc(color);
-  document.getElementById("dC").textContent=d.COST_RISK||"有额外支出风险";
-  document.getElementById("dS").textContent=d.PRICE_SAVING||"明显，但需要依据";
+  // 19.9版只显示定性描述，不显示具体金额
+  var costRisk = d.COST_RISK||"有额外支出风险";
+  var priceSaving = d.PRICE_SAVING||"明显，但需要依据";
+  // 去掉具体数字，只保留定性描述
+  costRisk = costRisk.replace(/\d+[-~]\d+元/g,"有风险").replace(/\d+元/g,"有风险").replace(/\d+万/g,"有风险");
+  priceSaving = priceSaving.replace(/可少付约?\d+[-~]?\d*元/g,"有空间，解锁查看").replace(/可少付约?\d+[-~]?\d*万/g,"有空间，解锁查看").replace(/\d+[-~]\d+元/g,"有空间").replace(/\d+万/g,"有空间");
+  document.getElementById("dC").textContent=costRisk;
+  document.getElementById("dS").textContent=priceSaving;
   document.getElementById("dN").textContent=(d.ISSUE_COUNT||"0")+" 个";
   document.getElementById("dDims").innerHTML=deepDims(d);
 
@@ -557,12 +563,14 @@ function renderAll(d) {
 async function startAnalyze() {
   var pasteText=document.getElementById("pasteText").value.trim();
   var price=document.getElementById("priceInput").value.trim();
-  if (!uploadedFile&&pasteText.length<3) { alert("请上传验车报告图片，或粘贴报告文字内容"); return; }
+  if (uploadedFiles.length===0&&pasteText.length<3) { alert("请上传验车报告图片，或粘贴报告文字内容"); return; }
   go("p1");
   animateSteps();
   try {
     var fd=new FormData();
-    if (uploadedFile) fd.append("file",uploadedFile);
+    if (uploadedFiles.length > 0) {
+      uploadedFiles.forEach(function(f, i) { fd.append("file_" + i, f); });
+    }
     var txt=pasteText;
     if (price) txt="当前报价："+price+"万元\n"+txt;
     if (txt) fd.append("text",txt);
