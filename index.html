@@ -424,26 +424,42 @@ function animateSteps() {
 }
 
 function parseResult(text) {
-  var d = { deducts:[], talks:[], actions:[], quits:[] };
+  var d = {
+    safety_issues:[], cost_issues:[], resale_issues:[],
+    talks:[], actions:[], quits:[], deducts:[]
+  };
   text.split("\n").forEach(function(line) {
-    var idx = line.indexOf(":");
-    if (idx < 0) return;
-    var k = line.substring(0, idx).trim();
-    var v = line.substring(idx+1).trim();
+    var ci = line.indexOf(":");
+    if (ci < 0) return;
+    var k = line.substring(0, ci).trim();
+    var v = line.substring(ci+1).trim();
     if (!k || !v) return;
-    if (/^DEDUCT_\d+$/.test(k)) { var p=v.split("|"); d.deducts.push({label:p[0]||"",amount:p[1]||""}); }
-    else if (/^TALK_\d+$/.test(k)) { d.talks.push(v); }
-    else if (/^ACTION_\d+$/.test(k)) { var p=v.split("|"); d.actions.push({main:p[0]||"",note:p[1]||"",type:p[2]||"tip"}); }
-    else if (/^QUIT_\d+$/.test(k)) { d.quits.push(v); }
-    else if (/^(SAFETY|COST|RESALE|PRICE)_ISSUE_\d+$/.test(k)) {
-      var dim=k.split("_")[0].toLowerCase();
+    if (/^SAFETY_ISSUE_\d+$/.test(k)) {
       var p=v.split("|");
-      if (!d[dim+"_issues"]) d[dim+"_issues"]=[];
-      d[dim+"_issues"].push({name:p[0]||"",tag:p[1]||"",meaning:p[2]||"",impact:p[3]||""});
-    } else { d[k]=v; }
+      d.safety_issues.push({name:p[0]||"",common:p[1]||"",safety:p[2]||"",cost:p[3]||"",price:p[4]||"",amount:p[5]||""});
+    } else if (/^COST_ISSUE_\d+$/.test(k)) {
+      var p=v.split("|");
+      d.cost_issues.push({name:p[0]||"",common:p[1]||"",safety:p[2]||"",cost:p[3]||"",price:p[4]||"",amount:p[5]||""});
+    } else if (/^RESALE_ISSUE_\d+$/.test(k)) {
+      var p=v.split("|");
+      d.resale_issues.push({name:p[0]||"",common:p[1]||"",safety:p[2]||"",cost:p[3]||"",price:p[4]||"",amount:p[5]||""});
+    } else if (/^TALK_\d+$/.test(k)) {
+      d.talks.push(v);
+    } else if (/^ACTION_\d+$/.test(k)) {
+      var p=v.split("|"); d.actions.push({title:p[0]||"",note:p[1]||"",type:p[2]||"tip"});
+    } else if (/^QUIT_\d+$/.test(k)) {
+      d.quits.push(v);
+    } else if (/^DEDUCT_\d+$/.test(k)) {
+      var p=v.split("|"); d.deducts.push({label:p[0]||"",amount:p[1]||""});
+    } else if (k==="SAFETY_SUB"||k==="COST_SUB"||k==="RESALE_SUB"||k==="PRICE_SUB") {
+      d[k] = v;
+    } else {
+      d[k] = v;
+    }
   });
   return d;
 }
+
 
 function xe(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 function vc(c, verdict) {
@@ -456,10 +472,10 @@ function vi(c) { return c==="green"?"✅":c==="red"?"❌":"🟡"; }
 
 function freeDims(d) {
   var dims=[
-    {num:"1",q:"能不能放心开",lv:d.SAFETY_LEVEL||"warn",lb:d.SAFETY_LABEL||"需关注",sub:d.SAFETY_LABEL||"有需要关注的地方"},
-    {num:"2",q:"以后会不会多花钱",lv:d.COST_LEVEL||"warn",lb:d.COST_LABEL||"偏高",sub:d.COST_LABEL||"后期可能有额外支出"},
-    {num:"3",q:"以后卖会不会亏",lv:d.RESALE_LEVEL||"warn",lb:d.RESALE_LABEL||"有风险",sub:d.RESALE_LABEL||"可能低于同类车"},
-    {num:"4",q:"现在买贵了吗",lv:d.PRICE_LEVEL||"warn",lb:d.PRICE_LABEL||"报价偏高",sub:d.PRICE_LABEL||"多数人在这里吃亏"}
+    {num:"1",q:"能不能放心开",lv:d.SAFETY_LEVEL||"warn",lb:d.SAFETY_LABEL||"需关注",sub:d.SAFETY_SUB||d.SAFETY_LABEL||""},
+    {num:"2",q:"以后会不会多花钱",lv:d.COST_LEVEL||"warn",lb:d.COST_LABEL||"需注意",sub:d.COST_SUB||d.COST_LABEL||""},
+    {num:"3",q:"以后卖会不会亏",lv:d.RESALE_LEVEL||"warn",lb:d.RESALE_LABEL||"有风险",sub:d.RESALE_SUB||d.RESALE_LABEL||""},
+    {num:"4",q:"现在买贵了吗",lv:d.PRICE_LEVEL||"warn",lb:d.PRICE_LABEL||"报价偏高",sub:d.PRICE_SUB||d.PRICE_LABEL||""}
   ];
   var h="";
   dims.forEach(function(dim) {
@@ -483,34 +499,76 @@ function freeDims(d) {
 
 function deepDims(d) {
   var dims=[
-    {ico:"🚗",name:"驾驶安全",lv:d.SAFETY_LEVEL||"warn",lb:d.SAFETY_LABEL||"",issues:d.safety_issues||[]},
-    {ico:"🔧",name:"维护成本",lv:d.COST_LEVEL||"warn",lb:d.COST_LABEL||"",issues:d.cost_issues||[]},
-    {ico:"📈",name:"保值率",lv:d.RESALE_LEVEL||"ok",lb:d.RESALE_LABEL||"",issues:d.resale_issues||[]},
-    {ico:"💰",name:"价格空间",lv:d.PRICE_LEVEL||"warn",lb:d.PRICE_LABEL||"",issues:d.price_issues||[]}
+    {num:"1",q:"能不能放心开",lv:d.SAFETY_LEVEL||"warn",lb:d.SAFETY_LABEL||"需关注",sub:d.SAFETY_SUB||"",issues:d.safety_issues||[],col2:"影响安全"},
+    {num:"2",q:"以后会不会多花钱",lv:d.COST_LEVEL||"warn",lb:d.COST_LABEL||"需注意",sub:d.COST_SUB||"",issues:d.cost_issues||[],col2:"影响养车"},
+    {num:"3",q:"以后卖会不会亏",lv:d.RESALE_LEVEL||"warn",lb:d.RESALE_LABEL||"有风险",sub:d.RESALE_SUB||"",issues:d.resale_issues||[],col2:"影响保值"},
+    {num:"4",q:"现在买贵了吗",lv:d.PRICE_LEVEL||"warn",lb:d.PRICE_LABEL||"报价偏高",sub:d.PRICE_SUB||"",issues:[],col2:""}
   ];
   var h="";
-  dims.forEach(function(dim) {
-    var bc=dim.lv==="ok"?"badge-ok":dim.lv==="bad"?"badge-bad":"badge-warn";
-    var em=dim.lv==="ok"?"✅":"⚠️";
-    h+="<div class='dim-card'><div class='dim-header'><div class='dim-left'><span class='dim-ico'>"+dim.ico+"</span><span class='dim-name'>"+xe(dim.name)+"</span></div>";
-    h+="<span class='dim-badge "+bc+"'>"+em+" "+xe(dim.lb)+"</span></div>";
-    if (dim.issues.length>0) {
-      h+="<div class='dim-issues'>";
-      dim.issues.forEach(function(issue) {
-        var tc=issue.tag==="关键"?"tag-red":issue.tag==="加分"?"tag-green":"tag-amber";
-        h+="<div class='issue-row'><span class='issue-tag "+tc+"'>"+xe(issue.tag)+"</span><div class='issue-body'>";
-        h+="<div class='issue-text'>"+xe(issue.name)+"</div>";
-        if (issue.meaning) h+="<div class='issue-meaning'>"+xe(issue.meaning)+"</div>";
-        if (issue.impact) h+="<div class='issue-impact'>"+xe(issue.impact)+"</div>";
-        h+="</div></div>";
+  dims.forEach(function(dim, di) {
+    var badgeColor = dim.lv==="ok" ? "color:#16a34a;background:#f0fdf4" :
+                     dim.lv==="bad" ? "color:#dc2626;background:#fef2f2" :
+                     "color:#d97706;background:#fffbeb";
+    h+="<div style='background:#fff;border-radius:12px;margin-bottom:7px;overflow:hidden;'>";
+    h+="<div style='display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;'>";
+    h+="<div style='display:flex;align-items:center;gap:12px;'>";
+    h+="<div style='width:30px;height:30px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;font-weight:700;color:#374151;'>"+dim.num+"</div>";
+    h+="<div style='font-size:18px;font-weight:700;color:#111;'>"+xe(dim.q)+"</div>";
+    h+="</div>";
+    h+="<span style='font-size:13px;padding:3px 12px;border-radius:20px;white-space:nowrap;"+badgeColor+"'>"+xe(dim.lb)+"</span>";
+    h+="</div>";
+
+    if (di < 3 && dim.issues.length > 0) {
+      h+="<div style='margin:0 16px 12px;border:0.5px solid #f3f4f6;border-radius:10px;overflow:hidden;'>";
+      dim.issues.forEach(function(issue, ii) {
+        if (ii > 0) h+="<div style='height:0.5px;background:#f3f4f6;'></div>";
+        h+="<div style='padding:10px 14px;'>";
+        h+="<div style='font-size:16px;font-weight:600;color:#111;margin-bottom:9px;'>"+xe(issue.name)+"</div>";
+        h+="<div style='display:flex;gap:6px;'>";
+        // col1: 常见程度
+        var commonColor = issue.common.indexOf("不常见")>=0||issue.common.indexOf("极少见")>=0 ? "#dc2626" : "#d97706";
+        h+="<div style='flex:1;text-align:center;padding:7px 4px;background:#f9fafb;border-radius:6px;'>";
+        h+="<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>常见程度</div>";
+        h+="<div style='font-size:13px;font-weight:600;color:"+commonColor+";'>"+xe(issue.common)+"</div></div>";
+        // col2: 影响本维度
+        var col2val = di===0 ? issue.safety : di===1 ? issue.cost : issue.cost;
+        var col2Color = col2val.indexOf("无")>=0||col2val.indexOf("小")>=0 ? "#9ca3af" : col2val.indexOf("大")>=0 ? "#dc2626" : "#d97706";
+        h+="<div style='flex:1;text-align:center;padding:7px 4px;background:#f9fafb;border-radius:6px;'>";
+        h+="<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>"+xe(dim.col2)+"</div>";
+        h+="<div style='font-size:13px;font-weight:600;color:"+col2Color+";'>"+xe(col2val)+"</div></div>";
+        // col3: 影响定价
+        var priceColor = issue.price.indexOf("无")>=0||issue.price.indexOf("小")>=0 ? "#9ca3af" : "#dc2626";
+        h+="<div style='flex:1;text-align:center;padding:7px 4px;background:#f9fafb;border-radius:6px;'>";
+        h+="<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>影响定价</div>";
+        h+="<div style='font-size:13px;font-weight:600;color:"+priceColor+";'>"+xe(issue.price)+"</div></div>";
+        h+="</div>"; // flex
+        h+="</div>"; // padding
       });
-      h+="</div>";
+      h+="</div>"; // border box
+    } else if (di === 3) {
+      // 价格维度：显示建议成交价
+      var sp = d.SUGGEST_PRICE || "";
+      var mr = d.MARKET_RANGE || "";
+      if (sp && sp !== "不建议购买") {
+        h+="<div style='margin:0 16px 12px;background:#0d1117;border-radius:10px;padding:16px;border:1.5px solid rgba(251,191,36,.3);'>";
+        h+="<div style='font-size:12px;color:rgba(251,191,36,.5);margin-bottom:6px;'>综合车况 + 市场参考</div>";
+        h+="<div style='display:flex;align-items:baseline;gap:10px;margin-bottom:4px;'>";
+        h+="<span style='font-size:32px;font-weight:700;color:#fbbf24;line-height:1;'>"+xe(sp)+"</span>";
+        h+="<span style='font-size:14px;color:rgba(255,255,255,.35);'>建议成交价</span></div>";
+        if (mr) h+="<div style='font-size:12px;color:rgba(255,255,255,.25);'>"+xe(mr)+"</div>";
+        h+="</div>";
+      } else {
+        h+="<div style='padding:6px 16px 14px 58px;font-size:15px;color:#9ca3af;'>需进一步判断</div>";
+      }
+    } else {
+      var subText = dim.sub || "暂无识别问题";
+      h+="<div style='padding:4px 16px 14px 58px;font-size:15px;color:#9ca3af;'>"+xe(subText)+"</div>";
     }
-    if (dim.name==="价格空间"&&dim.lv!=="ok") h+="<div class='dim-paywall'><span class='dp-text2'>建议出价 + 谈判话术</span><button class='dp-btn' data-go='p4f'>我帮你谈成</button></div>";
     h+="</div>";
   });
   return h;
 }
+
 
 function fullDims(d) {
   var dims=[
@@ -542,7 +600,13 @@ function renderAll(d) {
 
   document.getElementById("fV").innerHTML=verdict;
   document.getElementById("fV").className="b1-verdict "+vc(color,verdictText);
-  document.getElementById("fN").textContent=(d.ISSUE_COUNT||"0")+" 个";
+  document.getElementById("fN").textContent=(d.ISSUE_COUNT||"0")+" 个（影响价格）";
+  var hookEl=document.getElementById("fHook");
+  if(hookEl){hookEl.textContent=(d.VERDICT_COLOR==="red")?"⚠️ 这车建议放弃":"⚠️ 这车可能不止表面价格";}
+  var fCel=document.getElementById("fC");
+  if(fCel){fCel.textContent=d.COST_RISK_TEXT||"偏高（需注意）";}
+  var fSel=document.getElementById("fS");
+  if(fSel){fSel.textContent=d.PRICE_TEXT||"存在（需专业判断）";}
   document.getElementById("fDims").innerHTML=freeDims(d);
 
   document.getElementById("dV").innerHTML=verdict;
