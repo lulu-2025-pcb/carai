@@ -17,7 +17,7 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f1f1f1;color
 .h1sub{font-size:18px;color:rgba(255,255,255,.55);line-height:1.6;margin-bottom:16px;position:relative;z-index:1;}
 .proof{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.28);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;position:relative;z-index:1;}
 .proof-num{font-size:18px;font-weight:900;color:#f87171;white-space:nowrap;}
-.proof-t{font-size:19px;color:rgba(255,150,150,.6);line-height:1.4;}
+.proof-t{font-size:19px;color:rgba(255,150,150,.6);line-height:1.4;white-space:nowrap;}
 /* BODY */
 .body1{padding:14px 14px 100px;}
 .price-input{background:#fff;border-radius:14px;padding:13px 16px;margin-bottom:12px;}
@@ -32,7 +32,7 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f1f1f1;color
 .us{font-size:19px;color:#9ca3af;margin-bottom:9px;}
 .ftags{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;}
 .ftag{background:#eff6ff;color:#1d4ed8;font-size:9px;font-weight:700;padding:3px 8px;border-radius:20px;}
-#fileInput{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:100px;}
+#fileInput{display:none;}
 .orline{display:flex;align-items:center;gap:8px;color:#9ca3af;font-size:19px;margin:9px 0;}
 .orline::before,.orline::after{content:"";flex:1;height:1px;background:#e5e7eb;}
 .pastebox{background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:12px;}
@@ -164,7 +164,7 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f1f1f1;color
     <div class="h1sub">AI看懂车况 | 判断报价 | 给出谈价方案</div>
     <div class="proof">
       <div class="proof-num">5000-12000元</div>
-      <div class="proof-t">已帮用户平均<br>避免的损失金额</div>
+      <div class="proof-t">已帮用户平均避免的损失金额</div>
     </div>
   </div>
   <div class="body1">
@@ -175,7 +175,7 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f1f1f1;color
         <div class="pi-unit">万元</div>
       </div>
     </div>
-    <div class="upbox">
+    <div class="upbox" onclick="document.getElementById('fileInput').click()" style="cursor:pointer;">
       <input type="file" id="fileInput" accept="image/*" multiple>
       <div class="ucircle">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -667,7 +667,7 @@ function renderAll(d) {
 
   // 联系顾问按钮
   var btnContact = document.getElementById("btnContact");
-  if(btnContact) btnContact.onclick = function(){ alert("请添加微信：ailulu_car，备注"看车""); };
+  if(btnContact) btnContact.onclick = function(){ alert("请添加微信：ailulu_car，备注【看车】"); };
 }
 
 
