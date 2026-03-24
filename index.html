@@ -323,25 +323,27 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f1f1f1;color
 </div>
 
 <script>
-// ★ 把这里改成你的 Worker 地址
 var API = "https://api.ailulu.me/analyze";
 
 var uploadedFiles = [];
 var RES = {};
 
+function go(id) {
+  document.querySelectorAll(".page").forEach(function(p) {
+    p.classList.remove("active");
+  });
+  var el = document.getElementById(id);
+  if (el) el.classList.add("active");
+  window.scrollTo(0, 0);
+}
+
 function toggleDim(id) {
   var el = document.getElementById(id);
-  var arrow = document.getElementById(id+"_arrow");
+  var arrow = document.getElementById(id + "_arrow");
   if (!el) return;
   var isOpen = el.style.display !== "none";
   el.style.display = isOpen ? "none" : "block";
   if (arrow) arrow.textContent = isOpen ? "▶" : "▼";
-}
-
-function go(id) {
-  document.querySelectorAll(".page").forEach(function(p) { p.classList.remove("active"); });
-  document.getElementById(id).classList.add("active");
-  window.scrollTo(0, 0);
 }
 
 document.addEventListener("click", function(e) {
@@ -371,7 +373,9 @@ upbox.addEventListener("drop", function(e) {
   e.preventDefault();
   this.style.borderColor = "#bfdbfe";
   this.style.background = "#fff";
-  var files = Array.from(e.dataTransfer.files).filter(function(f){ return f.type.startsWith("image/"); });
+  var files = Array.from(e.dataTransfer.files).filter(function(f) {
+    return f.type && f.type.startsWith("image/");
+  });
   if (files.length > 0) {
     uploadedFiles = files;
     document.getElementById("uploadSub").textContent = "已选择 " + files.length + " 张图片";
@@ -379,462 +383,592 @@ upbox.addEventListener("drop", function(e) {
 });
 
 function animateSteps() {
-  ["st1","st2","st3","st4"].forEach(function(id) { document.getElementById(id).className = "si"; });
-  document.getElementById("pf").style.width = "0%";
-  var on = [400,2500,6000,10000];
-  var dn = [2300,5700,9700,14000];
-  ["st1","st2","st3","st4"].forEach(function(id, i) {
-    setTimeout(function() { document.getElementById(id).className = "si doing"; document.getElementById("pf").style.width = ((i+1)*18)+"%"; }, on[i]);
-    setTimeout(function() { document.getElementById(id).className = "si done"; document.getElementById("pf").style.width = ((i+1)*24)+"%"; }, dn[i]);
+  ["st1", "st2", "st3", "st4"].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.className = "si";
   });
+  var pf = document.getElementById("pf");
+  if (pf) pf.style.width = "0%";
+
+  var on = [300, 2200, 5200, 8600];
+  var dn = [1800, 4700, 8200, 12000];
+
+  ["st1", "st2", "st3", "st4"].forEach(function(id, i) {
+    setTimeout(function() {
+      var el = document.getElementById(id);
+      var pf = document.getElementById("pf");
+      if (el) el.className = "si doing";
+      if (pf) pf.style.width = ((i + 1) * 18) + "%";
+    }, on[i]);
+
+    setTimeout(function() {
+      var el = document.getElementById(id);
+      var pf = document.getElementById("pf");
+      if (el) el.className = "si done";
+      if (pf) pf.style.width = ((i + 1) * 24) + "%";
+    }, dn[i]);
+  });
+}
+
+function xe(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function normText(v) {
+  if (v == null) return "";
+  v = String(v).trim();
+  if (!v || v === "无") return "";
+  return v;
 }
 
 function parseResult(text) {
   var d = {
-    safety_issues:[], cost_issues:[], resale_issues:[],
-    talks:[], actions:[], quits:[], deducts:[]
+    safety_issues: [],
+    cost_issues: [],
+    resale_issues: [],
+    talks: [],
+    actions: [],
+    quits: [],
+    price_deducts: [],
+    plus: []
   };
-  text.split("\n").forEach(function(line) {
+
+  String(text || "").split(/\r?\n/).forEach(function(line) {
+    if (!line) return;
     var ci = line.indexOf(":");
     if (ci < 0) return;
+
     var k = line.substring(0, ci).trim();
-    var v = line.substring(ci+1).trim();
-    if (!k || !v) return;
+    var v = line.substring(ci + 1).trim();
+
+    if (!k) return;
+
     if (/^SAFETY_ISSUE_\d+$/.test(k)) {
-      var p=v.split("|");
-      d.safety_issues.push({name:p[0]||"",common:p[1]||"",impact:p[2]||"",action:p[3]||"",covered:p[4]||""});
-    } else if (/^COST_ISSUE_\d+$/.test(k)) {
-      var p=v.split("|");
-      d.cost_issues.push({name:p[0]||"",common:p[1]||"",impact:p[2]||"",action:p[3]||"",covered:p[4]||""});
-    } else if (/^RESALE_ISSUE_\d+$/.test(k)) {
-      var p=v.split("|");
-      d.resale_issues.push({name:p[0]||"",common:p[1]||"",impact:p[2]||"",action:p[3]||"",covered:p[4]||""});
-    } else if (/^PLUS_\d+$/.test(k)) {
-      d.plus = d.plus||[]; d.plus.push(v);
-    } else if (/^TALK_\d+$/.test(k)) {
-      d.talks.push(v);
-    } else if (/^ACTION_\d+$/.test(k)) {
-      var p=v.split("|"); d.actions.push({title:p[0]||"",note:p[1]||"",type:p[2]||"tip"});
-    } else if (/^QUIT_\d+$/.test(k)) {
-      d.quits.push(v);
-    } else if (/^DEDUCT_\d+$/.test(k)) {
-      var p=v.split("|"); d.deducts.push({label:p[0]||"",amount:p[1]||""});
-    } else if (/^PRICE_DEDUCT_\d+$/.test(k)) {
-      var p=v.split("|"); d.price_deducts = d.price_deducts||[]; d.price_deducts.push({name:p[0]||"",status:(p[1]||"").replace(/-/g,"").trim(),extra:p[2]||""});
-    } else if (k==="SAFETY_SUB"||k==="COST_SUB"||k==="RESALE_SUB"||k==="PRICE_SUB") {
-      d[k] = v;
-    } else {
-      d[k] = v;
+      var p1 = v.split("|");
+      d.safety_issues.push({
+        name: (p1[0] || "").trim(),
+        common: (p1[1] || "").trim(),
+        impact: (p1[2] || "").trim(),
+        action: (p1[3] || "").trim(),
+        covered: (p1[4] || "").trim()
+      });
+      return;
     }
+
+    if (/^COST_ISSUE_\d+$/.test(k)) {
+      var p2 = v.split("|");
+      d.cost_issues.push({
+        name: (p2[0] || "").trim(),
+        common: (p2[1] || "").trim(),
+        impact: (p2[2] || "").trim(),
+        action: (p2[3] || "").trim(),
+        covered: (p2[4] || "").trim()
+      });
+      return;
+    }
+
+    if (/^RESALE_ISSUE_\d+$/.test(k)) {
+      var p3 = v.split("|");
+      d.resale_issues.push({
+        name: (p3[0] || "").trim(),
+        common: (p3[1] || "").trim(),
+        impact: (p3[2] || "").trim(),
+        action: (p3[3] || "").trim(),
+        covered: (p3[4] || "").trim()
+      });
+      return;
+    }
+
+    if (/^PLUS_\d+$/.test(k)) {
+      if (normText(v)) d.plus.push(v.trim());
+      return;
+    }
+
+    if (/^TALK_\d+$/.test(k)) {
+      if (normText(v)) d.talks.push(v.trim());
+      return;
+    }
+
+    if (/^ACTION_\d+$/.test(k)) {
+      var pa = v.split("|");
+      if (normText(pa[0] || "")) {
+        d.actions.push({
+          title: (pa[0] || "").trim(),
+          note: (pa[1] || "").trim(),
+          type: ((pa[2] || "tip").trim() || "tip")
+        });
+      }
+      return;
+    }
+
+    if (/^QUIT_\d+$/.test(k)) {
+      if (normText(v)) d.quits.push(v.trim());
+      return;
+    }
+
+    if (/^PRICE_DEDUCT_\d+$/.test(k)) {
+      var pd = v.split("|");
+      if (normText(pd[0] || "")) {
+        d.price_deducts.push({
+          name: (pd[0] || "").trim(),
+          status: (pd[1] || "").replace(/-/g, "").trim(),
+          extra: (pd[2] || "").trim()
+        });
+      }
+      return;
+    }
+
+    d[k] = v;
   });
+
   return d;
 }
 
-
-function xe(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-function vc(c, verdict) {
-  if (c==="green") return "v-green";
-  if (c==="red") return "v-red";
-  if (verdict && verdict.indexOf("谨慎") >= 0) return "v-red";
-  return "v-amber";
+function levelColor(lv) {
+  return lv === "ok" ? "v-green" : lv === "bad" ? "v-red" : "v-amber";
 }
-function vi(c) { return c==="green"?"✅":c==="red"?"❌":"🟡"; }
+
+function levelTextFromCore(core, fallback) {
+  core = normText(core);
+  if (!core) return fallback || "需关注";
+  return core;
+}
 
 function freeDims(d) {
-  var dims=[
-    {num:"1",q:"能不能放心开",lv:d.SAFETY_LEVEL||"warn",lb:d.SAFETY_LABEL||"需关注",sub:d.SAFETY_SUB||""},
-    {num:"2",q:"以后会不会多花钱",lv:d.COST_LEVEL||"warn",lb:d.COST_LABEL||"需注意",sub:d.COST_SUB||""},
-    {num:"3",q:"以后卖会不会亏",lv:d.RESALE_LEVEL||"warn",lb:d.RESALE_LABEL||"有风险",sub:d.RESALE_SUB||""},
-  ];
-  var h="";
-  dims.forEach(function(dim, di) {
-    var badgeColor = dim.lv==="ok" ? "#4ade80" : dim.lv==="bad" ? "#f87171" : "#fbbf24";
-    var uid = "fdim_"+di;
-    h+="<div style='border-bottom:1px solid rgba(255,255,255,.07);'>";
-    h+="<div onclick='toggleDim(\""+uid+"\")' style='display:flex;align-items:center;justify-content:space-between;padding:14px 0;cursor:pointer;'>";
-    h+="<div style='display:flex;align-items:center;gap:10px;'>";
-    h+="<span style='font-size:13px;color:rgba(255,255,255,.3);font-weight:700;'>"+dim.num+"</span>";
-    h+="<span style='font-size:16px;font-weight:700;color:#fff;'>"+xe(dim.q)+"</span>";
-    h+="</div>";
-    h+="<div style='display:flex;align-items:center;gap:8px;'>";
-    h+="<span style='font-size:12px;font-weight:700;color:"+badgeColor+";'>"+xe(dim.lb)+"</span>";
-    h+="<span style='font-size:12px;color:rgba(255,255,255,.25);' id='"+uid+"_arrow'>▶</span>";
-    h+="</div></div>";
-    // 展开内容
-    h+="<div id='"+uid+"' style='display:none;padding-bottom:12px;'>";
-    if (dim.sub) h+="<div style='font-size:13px;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:8px;'>"+xe(dim.sub)+"</div>";
-    h+="<div style='font-size:12px;color:rgba(255,255,255,.25);'>解锁查看每个具体问题 →</div>";
-    h+="</div>";
-    h+="</div>";
-  });
-  // 第4维度锁定
-  h+="<div style='border-bottom:1px solid rgba(255,255,255,.07);'>";
-  h+="<div style='display:flex;align-items:center;justify-content:space-between;padding:14px 0;'>";
-  h+="<div style='display:flex;align-items:center;gap:10px;'>";
-  h+="<span style='font-size:13px;color:rgba(255,255,255,.3);font-weight:700;'>4</span>";
-  h+="<span style='font-size:16px;font-weight:700;color:#fff;'>现在买贵了吗</span>";
-  h+="</div>";
-  h+="<span style='font-size:12px;color:rgba(255,255,255,.3);'>🔒 解锁</span>";
-  h+="</div></div>";
-  return h;
-}
-
-
-function deepDims(d) {
-  var dims=[
-    {num:"1",q:"能不能放心开",lv:d.SAFETY_LEVEL||"warn",lb:d.SAFETY_LABEL||"需关注",sub:d.SAFETY_SUB||"",issues:d.safety_issues||[],col2:"影响安全"},
-    {num:"2",q:"以后会不会多花钱",lv:d.COST_LEVEL||"warn",lb:d.COST_LABEL||"需注意",sub:d.COST_SUB||"",issues:d.cost_issues||[],col2:"影响养车"},
-    {num:"3",q:"以后卖会不会亏",lv:d.RESALE_LEVEL||"warn",lb:d.RESALE_LABEL||"有风险",sub:d.RESALE_SUB||"",issues:d.resale_issues||[],col2:"影响保值"},
-    {num:"4",q:"现在买贵了吗",lv:d.PRICE_LEVEL||"warn",lb:d.PRICE_LABEL||"报价偏高",sub:d.PRICE_SUB||"",issues:[],col2:""}
-  ];
-  var h="";
-  dims.forEach(function(dim, di) {
-    var badgeColor = dim.lv==="ok" ? "color:#16a34a;background:#f0fdf4" :
-                     dim.lv==="bad" ? "color:#dc2626;background:#fef2f2" :
-                     "color:#d97706;background:#fffbeb";
-    h+="<div style='background:#fff;border-radius:12px;margin-bottom:7px;overflow:hidden;'>";
-    h+="<div style='display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;'>";
-    h+="<div style='display:flex;align-items:center;gap:12px;'>";
-    h+="<div style='width:30px;height:30px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;font-weight:700;color:#374151;'>"+dim.num+"</div>";
-    h+="<div style='font-size:18px;font-weight:700;color:#111;'>"+xe(dim.q)+"</div>";
-    h+="</div>";
-    h+="<span style='font-size:13px;padding:3px 12px;border-radius:20px;white-space:nowrap;"+badgeColor+"'>"+xe(dim.lb)+"</span>";
-    h+="</div>";
-
-    if (di < 3 && dim.issues.length > 0) {
-      h+="<div style='margin:0 16px 12px;border:0.5px solid #f3f4f6;border-radius:10px;overflow:hidden;'>";
-      dim.issues.forEach(function(issue, ii) {
-        if (ii > 0) h+="<div style='height:0.5px;background:#f3f4f6;'></div>";
-        h+="<div style='padding:10px 14px;'>";
-        h+="<div style='font-size:16px;font-weight:600;color:#111;margin-bottom:9px;'>"+xe(issue.name)+"</div>";
-        h+="<div style='display:flex;gap:6px;'>";
-        var commonColor = (issue.common||"").indexOf("极少见")>=0 ? "#dc2626" :
-                          (issue.common||"").indexOf("不常见")>=0 ? "#d97706" :
-                          (issue.common||"").indexOf("很常见")>=0 ? "#16a34a" : "#9ca3af";
-        h+="<div style='flex:1;text-align:center;padding:7px 4px;background:#f9fafb;border-radius:6px;'>";
-        h+="<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>常见程度</div>";
-        h+="<div style='font-size:13px;font-weight:600;color:"+commonColor+";'>"+xe(issue.common||"")+"</div></div>";
-        var impactVal = issue.impact||"";
-        var impactColor = (impactVal.indexOf("无")>=0||impactVal.indexOf("小")>=0||impactVal.indexOf("直接")>=0) ? "#9ca3af" : (impactVal.indexOf("大")>=0||impactVal.indexOf("高")>=0||impactVal.indexOf("隐患")>=0||impactVal.indexOf("风险")>=0) ? "#dc2626" : "#d97706";
-        h+="<div style='flex:1;text-align:center;padding:7px 4px;background:#f9fafb;border-radius:6px;'>";
-        h+="<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>"+xe(dim.col2)+"</div>";
-        h+="<div style='font-size:13px;font-weight:600;color:"+impactColor+";'>"+xe(impactVal)+"</div></div>";
-        h+="</div></div>";
-      });
-      h+="</div>";
-    } else if (di === 3) {
-      // 19.9价格维度：只引导，不显示任何价格信息
-      h+="<div style='padding:4px 16px 12px 58px;'>";
-      h+="<div style='font-size:13px;color:#9ca3af;margin-bottom:10px;'>报价有没有覆盖这辆车的折损？</div>";
-      h+="<div style='background:#fafafa;border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;'>";
-      h+="<span style='font-size:13px;color:#9ca3af;'>新车价折损拆解 + 覆盖分析</span>";
-      h+="<span style='font-size:12px;color:#d97706;font-weight:700;'>🔒 ¥99 解锁</span>";
-      h+="</div></div>";
-    } else {
-      var subText = dim.sub || "暂无识别问题";
-      h+="<div style='padding:4px 16px 14px 58px;font-size:15px;color:#9ca3af;'>"+xe(subText)+"</div>";
+  var dims = [
+    {
+      num: "1",
+      q: "能不能放心开",
+      lv: d.SAFETY_LEVEL || "warn",
+      lb: d.SAFETY_LABEL || "需关注",
+      sub: d.SAFETY_CORE || d.SAFETY_SUB || ""
+    },
+    {
+      num: "2",
+      q: "以后会不会多花钱",
+      lv: d.COST_LEVEL || "warn",
+      lb: d.COST_LABEL || "需注意",
+      sub: d.COST_CORE || d.COST_SUB || ""
+    },
+    {
+      num: "3",
+      q: "以后卖会不会亏",
+      lv: d.RESALE_LEVEL || "warn",
+      lb: d.RESALE_LABEL || "有风险",
+      sub: d.RESALE_CORE || d.RESALE_SUB || ""
     }
-    h+="</div>";
+  ];
+
+  var h = "";
+  dims.forEach(function(dim, di) {
+    var badgeColor = dim.lv === "ok" ? "#4ade80" : dim.lv === "bad" ? "#f87171" : "#fbbf24";
+    var uid = "fdim_" + di;
+    h += "<div style='border-bottom:1px solid rgba(255,255,255,.07);'>";
+    h += "<div onclick='toggleDim(\"" + uid + "\")' style='display:flex;align-items:center;justify-content:space-between;padding:14px 0;cursor:pointer;'>";
+    h += "<div style='display:flex;align-items:center;gap:10px;'>";
+    h += "<span style='font-size:13px;color:rgba(255,255,255,.3);font-weight:700;'>" + dim.num + "</span>";
+    h += "<span style='font-size:16px;font-weight:700;color:#fff;'>" + xe(dim.q) + "</span>";
+    h += "</div>";
+    h += "<div style='display:flex;align-items:center;gap:8px;'>";
+    h += "<span style='font-size:12px;font-weight:700;color:" + badgeColor + ";'>" + xe(dim.lb) + "</span>";
+    h += "<span style='font-size:12px;color:rgba(255,255,255,.25);' id='" + uid + "_arrow'>▶</span>";
+    h += "</div></div>";
+    h += "<div id='" + uid + "' style='display:none;padding-bottom:12px;'>";
+    if (normText(dim.sub)) {
+      h += "<div style='font-size:13px;color:rgba(255,255,255,.55);line-height:1.6;margin-bottom:8px;'>" + xe(dim.sub) + "</div>";
+    }
+    h += "<div style='font-size:12px;color:rgba(255,255,255,.25);'>解锁查看具体问题、事故还原和压价空间 →</div>";
+    h += "</div>";
+    h += "</div>";
   });
+
+  h += "<div style='border-bottom:1px solid rgba(255,255,255,.07);'>";
+  h += "<div style='display:flex;align-items:center;justify-content:space-between;padding:14px 0;'>";
+  h += "<div style='display:flex;align-items:center;gap:10px;'>";
+  h += "<span style='font-size:13px;color:rgba(255,255,255,.3);font-weight:700;'>4</span>";
+  h += "<span style='font-size:16px;font-weight:700;color:#fff;'>现在买贵了吗</span>";
+  h += "</div>";
+  h += "<span style='font-size:12px;color:rgba(255,255,255,.3);'>🔒 解锁</span>";
+  h += "</div></div>";
+
   return h;
 }
 
+function renderIssueRows(issues, col2) {
+  if (!issues || issues.length === 0) {
+    return "<div style='padding:10px 14px;font-size:13px;color:#9ca3af;'>✓ 未识别到明显问题</div>";
+  }
+
+  var h = "";
+  issues.forEach(function(issue) {
+    if (!normText(issue.name)) return;
+
+    var commonColor =
+      (issue.common || "").indexOf("极少见") >= 0 ? "#dc2626" :
+      (issue.common || "").indexOf("不常见") >= 0 ? "#d97706" :
+      (issue.common || "").indexOf("很常见") >= 0 ? "#16a34a" :
+      "#9ca3af";
+
+    var impactVal = issue.impact || "";
+    var impactColor =
+      impactVal.indexOf("无") >= 0 || impactVal.indexOf("不影响") >= 0 || impactVal.indexOf("仅外观") >= 0
+        ? "#9ca3af"
+        : impactVal.indexOf("高") >= 0 || impactVal.indexOf("隐患") >= 0 || impactVal.indexOf("风险") >= 0
+        ? "#dc2626"
+        : "#d97706";
+
+    h += "<div style='padding:10px 14px;border-bottom:1px solid #f3f4f6;'>";
+    h += "<div style='font-size:16px;font-weight:600;color:#111;margin-bottom:9px;'>" + xe(issue.name) + "</div>";
+    h += "<div style='display:flex;gap:6px;'>";
+    h += "<div style='flex:1;text-align:center;padding:7px 4px;background:#f9fafb;border-radius:6px;'>";
+    h += "<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>常见程度</div>";
+    h += "<div style='font-size:13px;font-weight:600;color:" + commonColor + ";'>" + xe(issue.common || "无") + "</div>";
+    h += "</div>";
+    h += "<div style='flex:1;text-align:center;padding:7px 4px;background:#f9fafb;border-radius:6px;'>";
+    h += "<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>" + xe(col2) + "</div>";
+    h += "<div style='font-size:13px;font-weight:600;color:" + impactColor + ";'>" + xe(impactVal || "无") + "</div>";
+    h += "</div>";
+    h += "</div>";
+
+    if (normText(issue.action)) {
+      h += "<div style='font-size:12px;color:#92400e;margin-top:8px;'>→ " + xe(issue.action) + "</div>";
+    }
+
+    if (issue.covered === "uncovered") {
+      h += "<div style='font-size:11px;color:#dc2626;margin-top:6px;'>报价未覆盖</div>";
+    } else if (issue.covered === "covered") {
+      h += "<div style='font-size:11px;color:#16a34a;margin-top:6px;'>报价已覆盖</div>";
+    }
+
+    h += "</div>";
+  });
+
+  return h;
+}
+
+function buildAccidentCard(d) {
+  var hasAny = normText(d.ACCIDENT_LEVEL) || normText(d.ACCIDENT_TYPE) || normText(d.ACCIDENT_CHAIN) || normText(d.ACCIDENT_DESC);
+  if (!hasAny) return "";
+
+  var h = "";
+  h += "<div style='background:#0d1117;margin:10px 12px 8px;border-radius:14px;padding:16px;border:1.5px solid rgba(239,68,68,.18);'>";
+  h += "<div style='font-size:19px;font-weight:800;color:#fff;margin-bottom:10px;'>事故还原</div>";
+
+  if (normText(d.ACCIDENT_LEVEL) || normText(d.ACCIDENT_TYPE)) {
+    h += "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;'>";
+    if (normText(d.ACCIDENT_LEVEL)) {
+      h += "<span style='background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.28);color:#fca5a5;border-radius:20px;padding:5px 10px;font-size:12px;font-weight:700;'>事故等级 " + xe(d.ACCIDENT_LEVEL) + "</span>";
+    }
+    if (normText(d.ACCIDENT_TYPE)) {
+      h += "<span style='background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.22);color:#fcd34d;border-radius:20px;padding:5px 10px;font-size:12px;font-weight:700;'>" + xe(d.ACCIDENT_TYPE) + "</span>";
+    }
+    h += "</div>";
+  }
+
+  if (normText(d.ACCIDENT_CHAIN)) {
+    h += "<div style='background:rgba(255,255,255,.05);border-radius:10px;padding:12px 14px;margin-bottom:8px;'>";
+    h += "<div style='font-size:12px;color:rgba(255,255,255,.35);margin-bottom:6px;'>撞击路径</div>";
+    h += "<div style='font-size:16px;font-weight:700;color:#fff;line-height:1.6;'>" + xe(d.ACCIDENT_CHAIN).replace(/→/g, " ➝ ") + "</div>";
+    h += "</div>";
+  }
+
+  if (normText(d.ACCIDENT_DESC)) {
+    h += "<div style='font-size:13px;color:rgba(255,255,255,.58);line-height:1.7;'>" + xe(d.ACCIDENT_DESC) + "</div>";
+  }
+
+  h += "</div>";
+  return h;
+}
+
+function buildPriceHero(d) {
+  var hasAny = normText(d.PRICE_LOSS_TOTAL) || normText(d.PRICE_GAP) || normText(d.BARGAIN_RANGE) || normText(d.PRICE_CORE);
+  if (!hasAny) return "";
+
+  var h = "";
+  h += "<div class='price-hero'>";
+  h += "<div class='ph-label'>报价覆盖判断</div>";
+  h += "<div class='ph-price'>" + xe(normText(d.PRICE_GAP) || normText(d.BARGAIN_RANGE) || "无明显压价空间") + "</div>";
+  h += "<div class='ph-range'>" + xe(normText(d.PRICE_CORE) || normText(d.PRICE_SUB) || "") + "</div>";
+  h += "<div class='ph-divider'></div>";
+  h += "<div class='ph-breakdown'>";
+
+  if (normText(d.PRICE_LOSS_TOTAL)) {
+    h += "<div class='ph-row'><span class='ph-item'>问题折价合计</span><span class='ph-red'>" + xe(d.PRICE_LOSS_TOTAL) + "</span></div>";
+  }
+  if (normText(d.PRICE_COVERED)) {
+    h += "<div class='ph-row'><span class='ph-item'>报价是否覆盖</span><span class='ph-amber'>" + xe(d.PRICE_COVERED) + "</span></div>";
+  }
+  if (normText(d.BARGAIN_RANGE)) {
+    h += "<div class='ph-row'><span class='ph-item'>建议谈价空间</span><span class='ph-red'>" + xe(d.BARGAIN_RANGE) + "</span></div>";
+  }
+
+  h += "</div></div>";
+  return h;
+}
+
+function buildTalkCard(d) {
+  if (!d.talks || d.talks.length === 0) return "";
+
+  var h = "";
+  h += "<div class='talk-card'>";
+  h += "<div class='tk-t'>直接照着谈</div>";
+  h += "<div class='tk-s'>这几句可以直接发给卖家或当面说</div>";
+  d.talks.forEach(function(t) {
+    h += "<div class='tk-item'>" + xe(t) + "</div>";
+  });
+  h += "</div>";
+  return h;
+}
+
+function buildActionCard(d) {
+  if (!d.actions || d.actions.length === 0) return "";
+
+  var h = "";
+  h += "<div class='action-card'>";
+  h += "<div class='ac-t'>下一步怎么做</div>";
+  d.actions.forEach(function(a, idx) {
+    h += "<div class='ac-item'>";
+    h += "<div class='ac-num'>" + (idx + 1) + "</div>";
+    h += "<div class='ac-body'>";
+    h += "<div class='ac-main'>" + xe(a.title) + "</div>";
+    if (normText(a.note)) {
+      h += "<div class='" + (a.type === "danger" ? "note-danger" : "note-tip") + "'>" + xe(a.note) + "</div>";
+    }
+    h += "</div></div>";
+  });
+  h += "</div>";
+  return h;
+}
 
 function fullDims(d) {
-  var dims=[
-    {num:"1",q:"能不能放心开",lv:d.SAFETY_LEVEL||"warn",lb:d.SAFETY_LABEL||"需关注",issues:d.safety_issues||[]},
-    {num:"2",q:"以后会不会多花钱",lv:d.COST_LEVEL||"warn",lb:d.COST_LABEL||"需注意",issues:d.cost_issues||[]},
-    {num:"3",q:"以后卖会不会亏",lv:d.RESALE_LEVEL||"warn",lb:d.RESALE_LABEL||"有风险",issues:d.resale_issues||[]},
-    {num:"4",q:"现在买贵了吗",lv:d.PRICE_LEVEL||"warn",lb:d.PRICE_LABEL||"报价偏高",issues:[]}
+  var dims = [
+    {
+      num: "1",
+      q: "能不能放心开",
+      lv: d.SAFETY_LEVEL || "warn",
+      lb: d.SAFETY_LABEL || "需关注",
+      sub: d.SAFETY_CORE || d.SAFETY_SUB || "",
+      issues: d.safety_issues || [],
+      col2: "安全影响"
+    },
+    {
+      num: "2",
+      q: "以后会不会多花钱",
+      lv: d.COST_LEVEL || "warn",
+      lb: d.COST_LABEL || "需注意",
+      sub: d.COST_CORE || d.COST_SUB || "",
+      issues: d.cost_issues || [],
+      col2: "花钱风险"
+    },
+    {
+      num: "3",
+      q: "以后卖会不会亏",
+      lv: d.RESALE_LEVEL || "warn",
+      lb: d.RESALE_LABEL || "有风险",
+      sub: d.RESALE_CORE || d.RESALE_SUB || "",
+      issues: d.resale_issues || [],
+      col2: "保值影响"
+    }
   ];
-  var h="";
 
-  // 亮点区块：图标+pill横排
+  var h = "";
+
   if (d.plus && d.plus.length > 0) {
-    h+="<div style='background:#f0fdf4;border-radius:12px;margin-bottom:8px;padding:12px 14px;border:1px solid #bbf7d0;'>";
-    h+="<div style='font-size:12px;font-weight:700;color:#15803d;margin-bottom:8px;letter-spacing:.5px;'>⭐ 这辆车的亮点</div>";
-    h+="<div style='display:flex;flex-wrap:wrap;gap:6px;'>";
+    h += "<div style='background:#f0fdf4;border-radius:12px;margin-bottom:8px;padding:12px 14px;border:1px solid #bbf7d0;'>";
+    h += "<div style='font-size:12px;font-weight:700;color:#15803d;margin-bottom:8px;letter-spacing:.5px;'>⭐ 这辆车的亮点</div>";
+    h += "<div style='display:flex;flex-wrap:wrap;gap:6px;'>";
     d.plus.forEach(function(p) {
-      h+="<div style='background:#dcfce7;border-radius:8px;padding:6px 10px;font-size:12px;color:#166534;line-height:1.4;'>"+xe(p)+"</div>";
+      h += "<div style='background:#dcfce7;border-radius:8px;padding:6px 10px;font-size:12px;color:#166534;line-height:1.4;'>" + xe(p) + "</div>";
     });
-    h+="</div></div>";
+    h += "</div></div>";
   }
 
-  dims.forEach(function(dim, di) {
+  h += buildAccidentCard(d);
+  h += buildPriceHero(d);
+
+  dims.forEach(function(dim) {
     var lv = dim.lv;
-    var headerBg = lv==="ok"?"#f0fdf4":lv==="bad"?"#fef2f2":"#fffbeb";
-    var headerBorder = lv==="ok"?"#bbf7d0":lv==="bad"?"#fecaca":"#fde68a";
-    var labelColor = lv==="ok"?"#15803d":lv==="bad"?"#dc2626":"#92400e";
-    var numBg = lv==="ok"?"#dcfce7":lv==="bad"?"#fee2e2":"#fef3c7";
-    var em = lv==="ok"?"✅":lv==="bad"?"❌":"⚠️";
+    var headerBg = lv === "ok" ? "#f0fdf4" : lv === "bad" ? "#fef2f2" : "#fffbeb";
+    var headerBorder = lv === "ok" ? "#bbf7d0" : lv === "bad" ? "#fecaca" : "#fde68a";
+    var labelColor = lv === "ok" ? "#15803d" : lv === "bad" ? "#dc2626" : "#92400e";
+    var numBg = lv === "ok" ? "#dcfce7" : lv === "bad" ? "#fee2e2" : "#fef3c7";
+    var em = lv === "ok" ? "✅" : lv === "bad" ? "❌" : "⚠️";
 
-    h+="<div style='background:#fff;border-radius:12px;margin-bottom:8px;overflow:hidden;border:1px solid #f3f4f6;'>";
+    h += "<div style='background:#fff;border-radius:12px;margin-bottom:8px;overflow:hidden;border:1px solid #f3f4f6;'>";
+    h += "<div style='display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:" + headerBg + ";border-bottom:1px solid " + headerBorder + ";'>";
+    h += "<div style='display:flex;align-items:center;gap:10px;'>";
+    h += "<div style='width:26px;height:26px;border-radius:50%;background:" + numBg + ";display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:" + labelColor + ";'>" + dim.num + "</div>";
+    h += "<span style='font-size:15px;font-weight:700;color:#111;'>" + xe(dim.q) + "</span>";
+    h += "</div>";
+    h += "<span style='font-size:13px;font-weight:700;color:" + labelColor + ";'>" + em + " " + xe(dim.lb) + "</span>";
+    h += "</div>";
 
-    // 标题行带颜色背景
-    h+="<div style='display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:"+headerBg+";border-bottom:1px solid "+headerBorder+";'>";
-    h+="<div style='display:flex;align-items:center;gap:10px;'>";
-    h+="<div style='width:26px;height:26px;border-radius:50%;background:"+numBg+";display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:"+labelColor+";'>"+dim.num+"</div>";
-    h+="<span style='font-size:15px;font-weight:700;color:#111;'>"+xe(dim.q)+"</span>";
-    h+="</div>";
-    h+="<span style='font-size:13px;font-weight:700;color:"+labelColor+";'>"+em+" "+xe(dim.lb)+"</span>";
-    h+="</div>";
-
-    if (di < 3) {
-      if (dim.issues.length > 0) {
-        dim.issues.forEach(function(issue, ii) {
-          var isVeryCommon = (issue.common||"").indexOf("很常见")>=0;
-          var isGood = (issue.impact||"").indexOf("无安全")>=0||(issue.impact||"").indexOf("不影响安全")>=0||(issue.impact||"").indexOf("仅外观")>=0;
-          var isBad = (issue.impact||"").indexOf("有安全隐患")>=0||(issue.impact||"").indexOf("存在安全隐患")>=0||(issue.impact||"").indexOf("安全风险")>=0;
-          var affectsPrice = issue.covered==="uncovered";
-
-          // 很常见的小问题整行灰色淡化
-          var rowOpacity = isVeryCommon && !affectsPrice ? "opacity:0.5;" : "";
-          var dotColor = isGood?"#16a34a":isBad?"#dc2626":"#f59e0b";
-          var nameColor = isGood?"#15803d":isBad?"#dc2626":"#374151";
-
-          h+="<div style='display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #f9fafb;"+rowOpacity+"'>";
-          h+="<span style='width:7px;height:7px;border-radius:50%;background:"+dotColor+";flex-shrink:0;'></span>";
-          h+="<div style='flex:1;min-width:0;'>";
-          h+="<div style='display:flex;align-items:center;gap:6px;flex-wrap:wrap;'>";
-          h+="<span style='font-size:14px;font-weight:600;color:"+nameColor+";'>"+xe(issue.name)+"</span>";
-          if (affectsPrice) h+="<span style='font-size:10px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;padding:1px 5px;border-radius:3px;font-weight:600;'>影响售价</span>";
-          // 覆盖状态
-          if (issue.covered==="uncovered") {
-            h+="<span style='font-size:10px;color:#dc2626;background:#fef2f2;border:1px solid #fecaca;padding:1px 5px;border-radius:3px;font-weight:600;'>报价未覆盖</span>";
-          } else if (issue.covered==="covered") {
-            h+="<span style='font-size:10px;color:#16a34a;background:#f0fdf4;border:1px solid #bbf7d0;padding:1px 5px;border-radius:3px;'>已覆盖</span>";
-          }
-          h+="</div>";
-          if (issue.action) {
-            var isIgnore = issue.action.indexOf("忽略")>=0||issue.action.indexOf("无需")>=0||issue.action.indexOf("可忽略")>=0||isVeryCommon;
-            h+="<div style='font-size:12px;color:"+(isIgnore?"#9ca3af":"#92400e")+";margin-top:2px;'>"+(isIgnore?"可忽略":"→ "+xe(issue.action))+"</div>";
-          }
-          h+="</div></div>";
-        });
-      } else {
-        h+="<div style='padding:10px 14px;font-size:13px;color:#9ca3af;'>✓ 未发现明显问题</div>";
-      }
-    } else {
-      // 第4步：价格结论
-      var priceSub = d.PRICE_SUB||"";
-      var priceFrom = d.PRICE_FROM||"";
-      var deducts = d.price_deducts||[];
-      var uncovered = deducts.filter(function(x){return x.status==="uncovered";});
-
-      h+="<div style='padding:12px 14px;'>";
-      if (lv==="ok") {
-        h+="<div style='font-size:14px;color:#15803d;font-weight:600;margin-bottom:6px;'>✅ 报价合理，可以直接谈</div>";
-        if (priceSub) h+="<div style='font-size:12px;color:#6b7280;'>"+xe(priceSub)+"</div>";
-      } else {
-        h+="<div style='font-size:14px;color:#92400e;font-weight:600;margin-bottom:6px;'>有压价空间</div>";
-        if (uncovered.length > 0) {
-          h+="<div style='font-size:12px;color:#6b7280;margin-bottom:8px;'>以下问题可作为压价依据：</div>";
-          uncovered.forEach(function(item) {
-            h+="<div style='display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f3f4f6;'>";
-            h+="<span style='font-size:13px;color:#374151;'>"+xe(item.name)+"</span>";
-            h+="<span style='font-size:12px;color:#dc2626;font-weight:600;'>"+xe(item.extra||"")+"</span>";
-            h+="</div>";
-          });
-        } else if (priceSub) {
-          h+="<div style='font-size:12px;color:#6b7280;'>"+xe(priceSub)+"</div>";
-        }
-      }
-      h+="</div>";
+    if (normText(dim.sub)) {
+      h += "<div style='padding:10px 14px 0;font-size:13px;color:#6b7280;line-height:1.7;'>" + xe(dim.sub) + "</div>";
     }
-    h+="</div>";
+
+    h += renderIssueRows(dim.issues, dim.col2);
+    h += "</div>";
   });
+
+  h += "<div style='background:#fff;border-radius:12px;margin-bottom:8px;overflow:hidden;border:1px solid #f3f4f6;'>";
+  h += "<div style='display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#fffbeb;border-bottom:1px solid #fde68a;'>";
+  h += "<div style='display:flex;align-items:center;gap:10px;'>";
+  h += "<div style='width:26px;height:26px;border-radius:50%;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#92400e;'>4</div>";
+  h += "<span style='font-size:15px;font-weight:700;color:#111;'>现在买贵了吗</span>";
+  h += "</div>";
+  h += "<span style='font-size:13px;font-weight:700;color:#92400e;'>💰 " + xe(d.PRICE_LABEL || "需判断") + "</span>";
+  h += "</div>";
+
+  h += "<div style='padding:12px 14px;'>";
+  if (normText(d.PRICE_CORE)) {
+    h += "<div style='font-size:14px;color:#111;font-weight:700;margin-bottom:6px;'>" + xe(d.PRICE_CORE) + "</div>";
+  }
+  if (normText(d.PRICE_SUB)) {
+    h += "<div style='font-size:13px;color:#6b7280;line-height:1.7;margin-bottom:10px;'>" + xe(d.PRICE_SUB) + "</div>";
+  }
+
+  if (d.price_deducts && d.price_deducts.length > 0) {
+    h += "<div style='background:#fafafa;border-radius:10px;padding:10px 12px;'>";
+    d.price_deducts.forEach(function(item) {
+      if (!normText(item.name)) return;
+      h += "<div style='display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;border-bottom:1px solid #f0f0f0;'>";
+      h += "<div style='font-size:13px;color:#374151;line-height:1.5;padding-right:10px;'>" + xe(item.name) + "</div>";
+      h += "<div style='font-size:12px;font-weight:700;color:" + (item.status === "covered" ? "#16a34a" : "#dc2626") + ";white-space:nowrap;'>" + xe(item.extra || (item.status === "covered" ? "已覆盖" : "未覆盖")) + "</div>";
+      h += "</div>";
+    });
+    h += "</div>";
+  }
+  h += "</div></div>";
+
+  h += buildTalkCard(d);
+  h += buildActionCard(d);
+
   return h;
 }
 
+function renderQuitPage(d) {
+  var quitVerdict = document.getElementById("quitVerdict");
+  var quitSub = document.getElementById("quitSub");
+  var quitReasons = document.getElementById("quitReasons");
 
-function renderAll(d) {
-  var color=d.VERDICT_COLOR||"amber";
-  var verdictText=d.VERDICT||"分析完成";
-  var verdict=vi(color)+" "+xe(verdictText);
+  if (quitVerdict) quitVerdict.textContent = "❌ " + (d.BUY_DECISION || d.VERDICT || "建议放弃");
+  if (quitSub) quitSub.textContent = d.BUY_REASON || d.VERDICT_SUB || "";
 
-  var fVel=document.getElementById("fV");
-  if(fVel){fVel.innerHTML=verdict;fVel.className="b1-verdict "+vc(color,verdictText);}
-  var totalIssues = (d.safety_issues||[]).length + (d.cost_issues||[]).length + (d.resale_issues||[]).length;
-  var issueCount = d.ISSUE_COUNT || (totalIssues > 0 ? String(totalIssues) : "0");
-  var fNel = document.getElementById("fN");
-  if(fNel){
-    fNel.textContent=issueCount+" 个（影响价格）";
-    fNel.className="b1-val "+(parseInt(issueCount)===0?"v-green":parseInt(issueCount)>=3?"v-red":"v-amber");
-  }
-  var hookEl=document.getElementById("fHook");
-  if(hookEl){hookEl.textContent=(d.VERDICT_COLOR==="red")?"❌ 建议放弃这辆车":"AI已完成车况分析，解锁查看详情";}
+  var reasons = [];
+  if (normText(d.ACCIDENT_DESC)) reasons.push("事故判断：" + d.ACCIDENT_DESC);
+  if (d.quits && d.quits.length) reasons = reasons.concat(d.quits);
+  if (normText(d.SAFETY_CORE)) reasons.push("安全维度：" + d.SAFETY_CORE);
+  if (normText(d.RESALE_CORE)) reasons.push("转手维度：" + d.RESALE_CORE);
 
-  // 免费版三维度
-  function levelColor(lv){ return lv==="ok"?"v-green":lv==="bad"?"v-red":"v-amber"; }
-  function levelText(lv,okT,warnT,badT){ return lv==="ok"?okT:lv==="bad"?badT:warnT; }
-  var fSafetyEl=document.getElementById("fSafety");
-  if(fSafetyEl){
-    fSafetyEl.textContent=d.SAFETY_LABEL||levelText(d.SAFETY_LEVEL||"warn","安全可靠","需关注","有隐患");
-    fSafetyEl.className="b1-val "+levelColor(d.SAFETY_LEVEL||"warn");
+  if (quitReasons) {
+    quitReasons.innerHTML = reasons.map(function(r) {
+      return "· " + xe(r);
+    }).join("<br>");
   }
-  var fCostEl=document.getElementById("fCost");
-  if(fCostEl){
-    fCostEl.textContent=d.COST_LABEL||levelText(d.COST_LEVEL||"warn","成本正常","有风险","偏高");
-    fCostEl.className="b1-val "+levelColor(d.COST_LEVEL||"warn");
-  }
-  var fResaleEl=document.getElementById("fResale");
-  if(fResaleEl){
-    fResaleEl.textContent=d.RESALE_LABEL||levelText(d.RESALE_LEVEL||"warn","保值正常","有风险","风险高");
-    fResaleEl.className="b1-val "+levelColor(d.RESALE_LEVEL||"warn");
-  }
-  document.getElementById("fDims").innerHTML=freeDims(d);
-
-  // 199顶部
-  document.getElementById("fullSub").textContent=d.VERDICT_SUB||"";
-  var fullFromEl=document.getElementById("fullFrom");
-  if(fullFromEl) fullFromEl.textContent=d.PRICE_FROM||"-";
-  var fullPriceEl=document.getElementById("fullPrice");
-  if(fullPriceEl){
-    fullPriceEl.textContent=d.PRICE_LABEL||"-";
-    fullPriceEl.className="b1-val "+levelColor(d.PRICE_LEVEL||"warn");
-  }
-  document.getElementById("fullDims").innerHTML=fullDims(d);
-
-  // 放弃条件
-  var qh="";
-  if (d.quits&&d.quits.length>0) {
-    qh="<div class='quit-card' style='margin:0 0 8px;'><div class='qt-t'>以下情况直接放弃</div>";
-    d.quits.forEach(function(q){ qh+="<div class='qt-row'>· "+xe(q)+"</div>"; });
-    qh+="</div>";
-  }
-  document.getElementById("fullQuits").innerHTML=qh;
-
-  // 联系顾问按钮
-  var btnContact = document.getElementById("btnContact");
-  if(btnContact) btnContact.onclick = function(){ alert("请添加微信：ailulu_car，备注【看车】"); };
 }
 
+function renderAll(d) {
+  var buyDecision = d.BUY_DECISION || d.VERDICT || "分析完成";
+  var buyReason = d.BUY_REASON || d.VERDICT_SUB || "";
+  var verdictColor = d.VERDICT_COLOR || (buyDecision.indexOf("不建议") >= 0 || buyDecision.indexOf("放弃") >= 0 ? "red" : buyDecision.indexOf("压价") >= 0 ? "amber" : "green");
+
+  var hookEl = document.getElementById("fHook");
+  if (hookEl) {
+    hookEl.textContent = normText(d.BUY_CONDITION) || buyDecision;
+  }
+
+  document.getElementById("fDims").innerHTML = freeDims(d);
+
+  var fullSub = document.getElementById("fullSub");
+  if (fullSub) fullSub.textContent = buyReason;
+
+  var fullFrom = document.getElementById("fullFrom");
+  if (fullFrom) fullFrom.textContent = d.PRICE_FROM || "-";
+
+  var fullPrice = document.getElementById("fullPrice");
+  if (fullPrice) {
+    fullPrice.textContent = d.PRICE_LABEL || d.PRICE_CORE || "-";
+    fullPrice.className = "b1-val " + levelColor(d.PRICE_LEVEL || "warn");
+  }
+
+  document.getElementById("fullDims").innerHTML = fullDims(d);
+
+  var qh = "";
+  if (d.quits && d.quits.length > 0) {
+    qh += "<div class='quit-card' style='margin:0 0 8px;'><div class='qt-t'>这些情况出现就不要谈了</div>";
+    d.quits.forEach(function(q) {
+      qh += "<div class='qt-row'>· " + xe(q) + "</div>";
+    });
+    qh += "</div>";
+  }
+  document.getElementById("fullQuits").innerHTML = qh;
+
+  var btnContact = document.getElementById("btnContact");
+  if (btnContact) {
+    btnContact.onclick = function() {
+      alert("请添加微信：ailulu_car，备注【看车】");
+    };
+  }
+
+  if (verdictColor === "red" || buyDecision.indexOf("不建议") >= 0 || buyDecision.indexOf("放弃") >= 0) {
+    renderQuitPage(d);
+  }
+}
 
 async function sliceImage(file, maxSliceH) {
-  return new Promise(function(resolve) {
+  return new Promise(function(resolve, reject) {
     var reader = new FileReader();
+    reader.onerror = function() { reject(new Error("读取图片失败")); };
     reader.onload = function(e) {
       var img = new Image();
+      img.onerror = function() { reject(new Error("图片解析失败")); };
       img.onload = function() {
         var w = img.width;
         var h = img.height;
+
         if (h <= maxSliceH * 1.5) {
           var canvas = document.createElement("canvas");
           var maxW = 1200;
           var sw = w, sh = h;
-          if (sw > maxW) { sh = Math.round(sh * maxW / sw); sw = maxW; }
-          canvas.width = sw; canvas.height = sh;
+          if (sw > maxW) {
+            sh = Math.round(sh * maxW / sw);
+            sw = maxW;
+          }
+          canvas.width = sw;
+          canvas.height = sh;
           canvas.getContext("2d").drawImage(img, 0, 0, sw, sh);
           canvas.toBlob(function(blob) {
             resolve([new File([blob], file.name, { type: "image/jpeg" })]);
           }, "image/jpeg", 0.85);
           return;
         }
+
         var slices = Math.ceil(h / maxSliceH);
-        var results = [];
+        var results = new Array(slices);
         var done = 0;
+
         for (var i = 0; i < slices; i++) {
           (function(idx) {
             var sy = idx * maxSliceH;
             var sh2 = Math.min(maxSliceH, h - sy);
+
             var maxW2 = 1200;
             var sw2 = w, scaledH = sh2;
-            if (sw2 > maxW2) { scaledH = Math.round(sh2 * maxW2 / sw2); sw2 = maxW2; }
-            var canvas2 = document.createElement("canvas");
-            canvas2.width = sw2; canvas2.height = scaledH;
-            canvas2.getContext("2d").drawImage(img, 0, sy, w, sh2, 0, 0, sw2, scaledH);
-            canvas2.toBlob(function(blob) {
-              results[idx] = new File([blob], "slice_" + idx + ".jpg", { type: "image/jpeg" });
-              done++;
-              if (done === slices) resolve(results);
-            }, "image/jpeg", 0.85);
-          })(i);
-        }
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-async function compressImage(file, maxSizeKB) {
-  return new Promise(function(resolve) {
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      var img = new Image();
-      img.onload = function() {
-        var canvas = document.createElement("canvas");
-        var ctx = canvas.getContext("2d");
-        var w = img.width;
-        var h = img.height;
-        // Max dimension 1200px
-        var maxDim = 1200;
-        if (w > maxDim || h > maxDim) {
-          if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
-          else { w = Math.round(w * maxDim / h); h = maxDim; }
-        }
-        canvas.width = w;
-        canvas.height = h;
-        ctx.drawImage(img, 0, 0, w, h);
-        // Start with quality 0.8, reduce until under maxSizeKB
-        var quality = 0.8;
-        var tryCompress = function() {
-          canvas.toBlob(function(blob) {
-            if (blob.size > maxSizeKB * 1024 && quality > 0.2) {
-              quality -= 0.1;
-              tryCompress();
-            } else {
-              resolve(new File([blob], file.name, { type: "image/jpeg" }));
+            if (sw2 > maxW2) {
+              scaledH = Math.round(sh2 * maxW2 / sw2);
+              sw2 = maxW2;
             }
-          }, "image/jpeg", quality);
-        };
-        tryCompress();
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
 
+            var canvas2 = document.createElement("canvas");
+            canvas2.width = sw2;
+            canvas2.height = scaledH;
+            canvas2.getContext("2d").drawImage(img, 0, sy, w, sh2, 0, 0, sw2, scaledH);
 
-// 把一张图片切割成多块，每块高度不超过maxSliceH像素
-async function sliceImage(file, maxSliceH) {
-  return new Promise(function(resolve) {
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      var img = new Image();
-      img.onload = function() {
-        var w = img.width;
-        var h = img.height;
-        // 如果图片不是长图，直接压缩返回
-        if (h <= maxSliceH * 1.5) {
-          var canvas = document.createElement("canvas");
-          var maxW = 1200;
-          var sw = w, sh = h;
-          if (sw > maxW) { sh = Math.round(sh * maxW / sw); sw = maxW; }
-          canvas.width = sw; canvas.height = sh;
-          canvas.getContext("2d").drawImage(img, 0, 0, sw, sh);
-          canvas.toBlob(function(blob) {
-            resolve([new File([blob], file.name, { type: "image/jpeg" })]);
-          }, "image/jpeg", 0.85);
-          return;
-        }
-        // 长图：切成多块
-        var slices = Math.ceil(h / maxSliceH);
-        var results = [];
-        var done = 0;
-        for (var i = 0; i < slices; i++) {
-          (function(idx) {
-            var sy = idx * maxSliceH;
-            var sh = Math.min(maxSliceH, h - sy);
-            // 按宽度等比缩放，最大1200px
-            var maxW = 1200;
-            var sw = w, scaledH = sh;
-            if (sw > maxW) { scaledH = Math.round(sh * maxW / sw); sw = maxW; }
-            var canvas = document.createElement("canvas");
-            canvas.width = sw; canvas.height = scaledH;
-            canvas.getContext("2d").drawImage(img, 0, sy, w, sh, 0, 0, sw, scaledH);
-            canvas.toBlob(function(blob) {
+            canvas2.toBlob(function(blob) {
               results[idx] = new File([blob], file.name.replace(/\./, "_" + idx + "."), { type: "image/jpeg" });
               done++;
               if (done === slices) resolve(results);
@@ -848,68 +982,63 @@ async function sliceImage(file, maxSliceH) {
   });
 }
 
-async function compressImage(file, maxSizeKB) {
-  return new Promise(function(resolve) {
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      var img = new Image();
-      img.onload = function() {
-        var canvas = document.createElement("canvas");
-        var ctx = canvas.getContext("2d");
-        var w = img.width; var h = img.height;
-        var maxDim = 1200;
-        if (w > maxDim || h > maxDim) {
-          if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
-          else { w = Math.round(w * maxDim / h); h = maxDim; }
-        }
-        canvas.width = w; canvas.height = h;
-        ctx.drawImage(img, 0, 0, w, h);
-        var quality = 0.8;
-        var tryCompress = function() {
-          canvas.toBlob(function(blob) {
-            if (blob.size > maxSizeKB * 1024 && quality > 0.2) {
-              quality -= 0.1; tryCompress();
-            } else {
-              resolve(new File([blob], file.name, { type: "image/jpeg" }));
-            }
-          }, "image/jpeg", quality);
-        };
-        tryCompress();
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
 async function startAnalyze() {
-  var pasteText=document.getElementById("pasteText").value.trim();
-  var price=document.getElementById("priceInput").value.trim();
-  if (uploadedFiles.length===0&&pasteText.length<3) { alert("请上传验车报告图片，或粘贴报告文字内容"); return; }
+  var pasteText = document.getElementById("pasteText").value.trim();
+  var price = document.getElementById("priceInput").value.trim();
+
+  if (uploadedFiles.length === 0 && pasteText.length < 3) {
+    alert("请上传验车报告图片，或粘贴报告文字内容");
+    return;
+  }
+
   go("p1");
   animateSteps();
+
   try {
-    var fd=new FormData();
+    var fd = new FormData();
+
     if (uploadedFiles.length > 0) {
-      // 切割长图后上传，每块高度1200px
       var allSlices = [];
       for (var fi = 0; fi < uploadedFiles.length; fi++) {
         var slices = await sliceImage(uploadedFiles[fi], 1200);
         allSlices = allSlices.concat(slices);
       }
-      allSlices.forEach(function(f, i) { fd.append("file_" + i, f); });
+      allSlices.forEach(function(f, i) {
+        fd.append("file_" + i, f);
+      });
     }
-    var txt=pasteText;
-    if (price) txt="当前报价："+price+"万元\n"+txt;
-    if (txt) fd.append("text",txt);
-    var resp=await fetch(API,{method:"POST",body:fd});
-    var data=await resp.json();
-    if (data.error) { alert("分析出错："+data.error); go("p0"); return; }
-    RES=parseResult(data.content||"");
+
+    var txt = pasteText;
+    if (price) {
+      txt = "当前报价：" + price + "万元\n" + txt;
+    }
+    if (txt) fd.append("text", txt);
+
+    var resp = await fetch(API, {
+      method: "POST",
+      body: fd
+    });
+
+    var data = await resp.json();
+
+    if (data.error) {
+      alert("分析出错：" + data.error);
+      go("p0");
+      return;
+    }
+
+    RES = parseResult(data.content || "");
     renderAll(RES);
-    go("p2");
-  } catch(e) { alert("网络错误："+e.message); go("p0"); }
+
+    var buyDecision = RES.BUY_DECISION || RES.VERDICT || "";
+    if (buyDecision.indexOf("不建议") >= 0 || buyDecision.indexOf("放弃") >= 0 || RES.VERDICT_COLOR === "red") {
+      go("p2quit");
+    } else {
+      go("p2");
+    }
+  } catch (e) {
+    alert("网络错误：" + e.message);
+    go("p0");
+  }
 }
 </script>
-</body>
-</html>
