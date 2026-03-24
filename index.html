@@ -197,10 +197,10 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f1f1f1;color
     <div class="dims-preview">
       <div class="dp-label">上传后 AI 分析这四个维度：</div>
       <div class="dp-grid">
-        <div class="dp-item"><span class="dp-ico">🚗</span><div><div class="dp-t">驾驶安全</div><div class="dp-s">事故/结构/盲区</div></div></div>
-        <div class="dp-item"><span class="dp-ico">🔧</span><div><div class="dp-t">维护成本</div><div class="dp-s">后期支出预估</div></div></div>
-        <div class="dp-item"><span class="dp-ico">📈</span><div><div class="dp-t">保值率</div><div class="dp-s">转手价格影响</div></div></div>
-        <div class="dp-item"><span class="dp-ico">💰</span><div><div class="dp-t">价格空间</div><div class="dp-s">报价是否合理</div></div></div>
+        <div class="dp-item"><div class="dp-t">1 能不能放心开</div></div>
+        <div class="dp-item"><div class="dp-t">2 以后会不会多花钱</div></div>
+        <div class="dp-item"><div class="dp-t">3 以后卖会不会亏</div></div>
+        <div class="dp-item"><div class="dp-t">4 现在买贵了吗</div></div>
       </div>
     </div>
   </div>
@@ -269,76 +269,26 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f1f1f1;color
   </div>
   <div class="blk2" id="fDims"></div>
   <div class="cta-fixed">
-    <button class="btn-amber" data-go="p3f">看每个问题具体是什么 ¥19.9 →</button>
+    <button class="btn-amber" data-go="p4f">看每个问题具体是什么 ¥99 →</button>
     <button class="btn-ghost" data-go="p0">← 重新上传</button>
-  </div>
-</div>
-
-<!-- 付款19.9 -->
-<div class="page" id="p3f">
-  <div class="pay-top">
-    <div class="pay-tier">轻决策版 · ¥19.9</div>
-    <div class="pay-title">解锁完整问题分析</div>
-    <div class="pay-desc">看懂每个问题在哪<br>知道会让你多花多少钱</div>
-    <div class="pay-price-big"><span>¥</span>19.9</div>
-    <div class="pay-ori">原价 ¥39</div>
-  </div>
-  <div class="pay-body">
-    <div class="pay-card">
-      <div class="pay-card-t">解锁后你能看到：</div>
-      <div class="pay-item">✓ 每个问题具体是什么，影响哪个方面</div>
-      <div class="pay-item">✓ 这些问题在二手车里常见还是罕见</div>
-      <div class="pay-item">✓ 后期养车有没有额外风险</div>
-      <div class="pay-item" style="color:#9ca3af;">🔒 报价有没有覆盖折损 + 谈判话术 → ¥199</div>
-    </div>
-    <div class="qr-card">
-      <div class="qr-t">扫码支付宝付款</div>
-      <div class="qr-s">付款后点我已付款解锁</div>
-      <img src="qr.jpg" style="width:150px;height:150px;border-radius:10px;display:block;margin:0 auto 14px;">
-    </div>
-  </div>
-  <div class="pay-cta">
-    <button class="pay-back" data-go="p2">← 返回</button>
-    <button class="pay-ok" data-go="p3">我已付款，解锁 →</button>
-  </div>
-</div>
-
-<!-- 19.9结果 -->
-<div class="page" id="p3">
-  <div class="blk1">
-    <div class="b1-eye">报告解读 · ¥19.9已解锁</div>
-    <div style="font-size:13px;color:rgba(255,255,255,.45);margin-bottom:12px;" id="dVsub">这些问题，你该担心多少？</div>
-    <div class="b1-rows">
-      <div class="b1-row"><span class="b1-label">发现关键问题</span><span class="b1-val v-red" id="dN">-</span></div>
-      <div class="b1-row"><span class="b1-label">安全风险</span><span class="b1-val" id="dSafety">-</span></div>
-      <div class="b1-row"><span class="b1-label">后期成本</span><span class="b1-val" id="dCost">-</span></div>
-    </div>
-  </div>
-  <div class="blk2" id="dDims"></div>
-  <div class="cant-do">
-    <div class="cd-t">⚠️ 知道有什么问题了，这个价格值不值？</div>
-    <div class="cd-b">报价有没有覆盖这些折损——在¥199里<br>已付¥19.9直接抵扣</div>
-  </div>
-  <div class="cta-fixed">
-    <button class="btn-amber" id="btnUnlock999" data-go="p4f">看这个价格值不值 ¥179.1 →</button>
-    <button class="btn-ghost" data-go="p2">← 返回</button>
   </div>
 </div>
 
 <!-- 付款199 -->
 <div class="page" id="p4f">
   <div class="pay-top">
-    <div class="pay-tier">完整决策版 · ¥199</div>
-    <div class="pay-title">我帮你把这单谈成</div>
-    <div class="pay-desc">建议出价 · 谈判话术 · 行动路径</div>
-    <div class="pay-price-big"><span>¥</span>199</div>
+    <div class="pay-tier">完整决策版 · ¥99</div>
+    <div class="pay-title">看懂这辆车，谈下这单</div>
+    <div class="pay-desc">车况分析 · 价格是否合理 · 谈判话术</div>
+    <div class="pay-price-big"><span>¥</span>99</div>
     <div class="pay-ori">预计帮你省 5000-15000 元</div>
   </div>
   <div class="pay-body">
     <div class="pay-card">
-      <div class="pay-card-t">¥199 版全部内容：</div>
-      <div class="pay-item">✓ 19.9版全部内容</div>
-      <div class="pay-item">✓ <b>建议成交价</b>（一个明确数字）</div>
+      <div class="pay-card-t">解锁后你能看到：</div>
+      <div class="pay-item">✓ 每个问题具体是什么，严不严重</div>
+      <div class="pay-item">✓ 车辆真实亮点，好在哪里</div>
+      <div class="pay-item">✓ 报价有没有覆盖车况折损</div>
       <div class="pay-item">✓ <b>3句谈判话术</b>（直接对着卖家念）</div>
       <div class="pay-item">✓ <b>谈判路径</b>（4步走完这单）</div>
       <div class="pay-item">✓ <b>放弃条件</b>（什么时候该走人）</div>
@@ -350,7 +300,7 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f1f1f1;color
     </div>
   </div>
   <div class="pay-cta">
-    <button class="pay-back" data-go="p3">← 返回</button>
+    <button class="pay-back" data-go="p2">← 返回</button>
     <button class="pay-ok" data-go="p4">我已付款，解锁 →</button>
   </div>
 </div>
@@ -358,7 +308,7 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f1f1f1;color
 <!-- 199结果 -->
 <div class="page" id="p4">
   <div class="blk1">
-    <div class="b1-eye">AI 完整决策方案 · ¥199 已解锁</div>
+    <div class="b1-eye">AI 完整决策方案 · ¥99 已解锁</div>
     <div class="b1-sub" id="fullSub" style="font-size:14px;color:rgba(255,255,255,.5);margin-bottom:4px;"></div>
     <div class="b1-rows">
       <div class="b1-row"><span class="b1-label">卖家报价</span><span class="b1-val v-red" id="fullFrom">-</span></div>
@@ -448,7 +398,7 @@ function parseResult(text) {
     } else if (/^DEDUCT_\d+$/.test(k)) {
       var p=v.split("|"); d.deducts.push({label:p[0]||"",amount:p[1]||""});
     } else if (/^PRICE_DEDUCT_\d+$/.test(k)) {
-      var p=v.split("|"); d.price_deducts = d.price_deducts||[]; d.price_deducts.push({name:p[0]||"",amount:p[1]||"",status:p[2]||"covered",extra:p[3]||""});
+      var p=v.split("|"); d.price_deducts = d.price_deducts||[]; d.price_deducts.push({name:p[0]||"",status:(p[1]||"").replace(/-/g,"").trim(),extra:p[2]||""});
     } else if (k==="SAFETY_SUB"||k==="COST_SUB"||k==="RESALE_SUB"||k==="PRICE_SUB") {
       d[k] = v;
     } else {
@@ -554,7 +504,7 @@ function deepDims(d) {
       h+="<div style='font-size:13px;color:#9ca3af;margin-bottom:10px;'>报价有没有覆盖这辆车的折损？</div>";
       h+="<div style='background:#fafafa;border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;'>";
       h+="<span style='font-size:13px;color:#9ca3af;'>新车价折损拆解 + 覆盖分析</span>";
-      h+="<span style='font-size:12px;color:#d97706;font-weight:700;'>🔒 ¥179.1 解锁</span>";
+      h+="<span style='font-size:12px;color:#d97706;font-weight:700;'>🔒 ¥99 解锁</span>";
       h+="</div></div>";
     } else {
       var subText = dim.sub || "暂无识别问题";
@@ -695,7 +645,7 @@ function renderAll(d) {
     fNel.className="b1-val "+(parseInt(issueCount)===0?"v-green":parseInt(issueCount)>=3?"v-red":"v-amber");
   }
   var hookEl=document.getElementById("fHook");
-  if(hookEl){hookEl.textContent=(d.VERDICT_COLOR==="red")?"⚠️ 这车建议放弃":"⚠️ AI已完成车况分析";}
+  if(hookEl){hookEl.textContent=(d.VERDICT_COLOR==="red")?"❌ 建议放弃这辆车":"AI已完成车况分析，解锁查看详情";}
 
   // 免费版三维度
   function levelColor(lv){ return lv==="ok"?"v-green":lv==="bad"?"v-red":"v-amber"; }
@@ -716,27 +666,6 @@ function renderAll(d) {
     fResaleEl.className="b1-val "+levelColor(d.RESALE_LEVEL||"warn");
   }
   document.getElementById("fDims").innerHTML=freeDims(d);
-
-  // 19.9版
-  var dVsub = document.getElementById("dVsub");
-  if(dVsub) dVsub.textContent = d.VERDICT_SUB || "报告解读已完成";
-  var dNel=document.getElementById("dN");
-  if(dNel){
-    var issueCount = d.ISSUE_COUNT || "0";
-    dNel.textContent=issueCount+" 个";
-    dNel.className="b1-val "+(parseInt(issueCount)===0?"v-green":parseInt(issueCount)>=3?"v-red":"v-amber");
-  }
-  var dSafetyEl=document.getElementById("dSafety");
-  if(dSafetyEl){
-    dSafetyEl.textContent=d.SAFETY_LABEL||levelText(d.SAFETY_LEVEL||"warn","安全可靠","需关注","有隐患");
-    dSafetyEl.className="b1-val "+levelColor(d.SAFETY_LEVEL||"warn");
-  }
-  var dCostEl=document.getElementById("dCost");
-  if(dCostEl){
-    dCostEl.textContent=d.COST_LABEL||levelText(d.COST_LEVEL||"warn","成本正常","有风险","偏高");
-    dCostEl.className="b1-val "+levelColor(d.COST_LEVEL||"warn");
-  }
-  document.getElementById("dDims").innerHTML=deepDims(d);
 
   // 199顶部
   document.getElementById("fullSub").textContent=d.VERDICT_SUB||"";
@@ -994,14 +923,7 @@ async function startAnalyze() {
     if (data.error) { alert("分析出错："+data.error); go("p0"); return; }
     RES=parseResult(data.content||"");
     renderAll(RES);
-    // 根据结论路由到不同页面
-    var v = RES.VERDICT||"";
-    var c = RES.VERDICT_COLOR||"amber";
-    if (c==="red" || v.indexOf("放弃")>=0) {
-      go("p2quit"); // 建议放弃页
-    } else {
-      go("p2"); // 正常免费结果页
-    }
+    go("p2");
   } catch(e) { alert("网络错误："+e.message); go("p0"); }
 }
 </script>
