@@ -532,7 +532,8 @@ function deepDims(d) {
         h+="<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>常见程度</div>";
         h+="<div style='font-size:13px;font-weight:600;color:"+commonColor+";'>"+xe(issue.common||"")+"</div></div>";
         // col2: 影响本维度（定性，不含金额）
-        var col2val = di===0 ? (issue.safety||"") : (issue.cost||"");
+        var col2val = di===0 ? (issue.safety||"") : di===1 ? (issue.cost||"") : (issue.safety||"有影响");
+        // resale维度用safety字段（第3列）做定性描述，cost字段是金额不展示
         var col2Color = (col2val.indexOf("无")>=0||col2val.indexOf("小")>=0||col2val.indexOf("直接")>=0) ? "#9ca3af" : (col2val.indexOf("大")>=0||col2val.indexOf("高")>=0||col2val.indexOf("隐患")>=0) ? "#dc2626" : "#d97706";
         h+="<div style='flex:1;text-align:center;padding:7px 4px;background:#f9fafb;border-radius:6px;'>";
         h+="<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>"+xe(dim.col2)+"</div>";
@@ -598,10 +599,11 @@ function fullDims(d) {
         h+="<div style='flex:1;text-align:center;padding:7px 4px;background:#f9fafb;border-radius:6px;'>";
         h+="<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>"+xe(dim.col2)+"</div>";
         h+="<div style='font-size:13px;font-weight:600;color:"+col2Color+";'>"+xe(col2val)+"</div></div>";
-        var priceColor = (issue.price||"").indexOf("无")>=0||(issue.price||"").indexOf("小")>=0||(issue.price||"").indexOf("直接")>=0 ? "#9ca3af" : "#dc2626";
+        var amountVal = issue.amount || issue.price || "";
+        var amountColor = (amountVal.indexOf("无")>=0||amountVal.indexOf("0元")>=0) ? "#9ca3af" : "#dc2626";
         h+="<div style='flex:1;text-align:center;padding:7px 4px;background:#f9fafb;border-radius:6px;'>";
-        h+="<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>影响定价</div>";
-        h+="<div style='font-size:13px;font-weight:600;color:"+priceColor+";'>"+xe(issue.price||"")+"</div></div>";
+        h+="<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>额外费用</div>";
+        h+="<div style='font-size:13px;font-weight:600;color:"+amountColor+";'>"+xe(amountVal)+"</div></div>";
         h+="</div></div>";
       });
       h+="</div>";
