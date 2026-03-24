@@ -402,13 +402,13 @@ function parseResult(text) {
     if (!k || !v) return;
     if (/^SAFETY_ISSUE_\d+$/.test(k)) {
       var p=v.split("|");
-      d.safety_issues.push({name:p[0]||"",common:p[1]||"",impact:p[2]||"",action:p[3]||""});
+      d.safety_issues.push({name:p[0]||"",common:p[1]||"",impact:p[2]||"",action:p[3]||"",covered:p[4]||""});
     } else if (/^COST_ISSUE_\d+$/.test(k)) {
       var p=v.split("|");
-      d.cost_issues.push({name:p[0]||"",common:p[1]||"",impact:p[2]||"",action:p[3]||""});
+      d.cost_issues.push({name:p[0]||"",common:p[1]||"",impact:p[2]||"",action:p[3]||"",covered:p[4]||""});
     } else if (/^RESALE_ISSUE_\d+$/.test(k)) {
       var p=v.split("|");
-      d.resale_issues.push({name:p[0]||"",common:p[1]||"",impact:p[2]||"",action:p[3]||""});
+      d.resale_issues.push({name:p[0]||"",common:p[1]||"",impact:p[2]||"",action:p[3]||"",covered:p[4]||""});
     } else if (/^PLUS_\d+$/.test(k)) {
       d.plus = d.plus||[]; d.plus.push(v);
     } else if (/^TALK_\d+$/.test(k)) {
@@ -598,6 +598,12 @@ function fullDims(d) {
           h+="<div style='display:flex;align-items:center;gap:6px;flex-wrap:wrap;'>";
           h+="<span style='font-size:14px;font-weight:600;color:"+nameColor+";'>"+xe(issue.name)+"</span>";
           if (affectsPrice) h+="<span style='font-size:10px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;padding:1px 5px;border-radius:3px;font-weight:600;'>影响售价</span>";
+          // 覆盖状态
+          if (issue.covered==="uncovered") {
+            h+="<span style='font-size:10px;color:#dc2626;background:#fef2f2;border:1px solid #fecaca;padding:1px 5px;border-radius:3px;font-weight:600;'>报价未覆盖</span>";
+          } else if (issue.covered==="covered") {
+            h+="<span style='font-size:10px;color:#16a34a;background:#f0fdf4;border:1px solid #bbf7d0;padding:1px 5px;border-radius:3px;'>已覆盖</span>";
+          }
           h+="</div>";
           if (issue.action) {
             var isIgnore = issue.action.indexOf("忽略")>=0||issue.action.indexOf("无需")>=0||issue.action.indexOf("可忽略")>=0||isVeryCommon;
