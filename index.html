@@ -583,9 +583,9 @@ function fullDims(d) {
       if (dim.issues.length > 0) {
         dim.issues.forEach(function(issue, ii) {
           var isVeryCommon = (issue.common||"").indexOf("很常见")>=0;
-          var isGood = (issue.impact||"").indexOf("无")>=0||(issue.impact||"").indexOf("不影响")>=0||(issue.impact||"").indexOf("正常")>=0;
-          var isBad = !isGood && !isVeryCommon && ((issue.impact||"").indexOf("风险")>=0||(issue.impact||"").indexOf("隐患")>=0||(issue.impact||"").indexOf("影响大")>=0||(issue.common||"").indexOf("不常见")>=0||(issue.common||"").indexOf("极少见")>=0);
-          var affectsPrice = (issue.price||"")!=="" && (issue.price||"").indexOf("无")<0 && (issue.price||"").indexOf("直接")<0;
+          var isGood = (issue.impact||"").indexOf("无安全")>=0||(issue.impact||"").indexOf("不影响安全")>=0||(issue.impact||"").indexOf("仅外观")>=0;
+          var isBad = (issue.impact||"").indexOf("有安全隐患")>=0||(issue.impact||"").indexOf("存在安全隐患")>=0||(issue.impact||"").indexOf("安全风险")>=0;
+          var affectsPrice = issue.covered==="uncovered";
 
           // 很常见的小问题整行灰色淡化
           var rowOpacity = isVeryCommon && !affectsPrice ? "opacity:0.5;" : "";
