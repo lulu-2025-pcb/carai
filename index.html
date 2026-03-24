@@ -521,86 +521,98 @@ function deepDims(d) {
 
 function fullDims(d) {
   var dims=[
-    {num:"1",q:"能不能放心开",lv:d.SAFETY_LEVEL||"warn",lb:d.SAFETY_LABEL||"需关注",sub:d.SAFETY_SUB||"",issues:d.safety_issues||[]},
-    {num:"2",q:"以后会不会多花钱",lv:d.COST_LEVEL||"warn",lb:d.COST_LABEL||"需注意",sub:d.COST_SUB||"",issues:d.cost_issues||[]},
-    {num:"3",q:"以后卖会不会亏",lv:d.RESALE_LEVEL||"warn",lb:d.RESALE_LABEL||"有风险",sub:d.RESALE_SUB||"",issues:d.resale_issues||[]},
-    {num:"4",q:"现在买贵了吗",lv:d.PRICE_LEVEL||"warn",lb:d.PRICE_LABEL||"报价偏高",sub:d.PRICE_SUB||"",issues:[]}
+    {num:"1",q:"能不能放心开",lv:d.SAFETY_LEVEL||"warn",lb:d.SAFETY_LABEL||"需关注",issues:d.safety_issues||[]},
+    {num:"2",q:"以后会不会多花钱",lv:d.COST_LEVEL||"warn",lb:d.COST_LABEL||"需注意",issues:d.cost_issues||[]},
+    {num:"3",q:"以后卖会不会亏",lv:d.RESALE_LEVEL||"warn",lb:d.RESALE_LABEL||"有风险",issues:d.resale_issues||[]},
+    {num:"4",q:"现在买贵了吗",lv:d.PRICE_LEVEL||"warn",lb:d.PRICE_LABEL||"报价偏高",issues:[]}
   ];
   var h="";
 
-  // 亮点区块
+  // 亮点区块：图标+pill横排
   if (d.plus && d.plus.length > 0) {
-    h+="<div style='background:#f0fdf4;border-radius:12px;margin-bottom:8px;padding:14px 16px;border:1px solid #bbf7d0;'>";
-    h+="<div style='font-size:13px;font-weight:700;color:#15803d;margin-bottom:8px;'>✅ 这辆车的亮点</div>";
+    h+="<div style='background:#f0fdf4;border-radius:12px;margin-bottom:8px;padding:12px 14px;border:1px solid #bbf7d0;'>";
+    h+="<div style='font-size:12px;font-weight:700;color:#15803d;margin-bottom:8px;letter-spacing:.5px;'>⭐ 这辆车的亮点</div>";
+    h+="<div style='display:flex;flex-wrap:wrap;gap:6px;'>";
     d.plus.forEach(function(p) {
-      h+="<div style='font-size:13px;color:#166534;padding:5px 0;border-bottom:1px solid rgba(34,197,94,.12);line-height:1.5;'>"+xe(p)+"</div>";
+      h+="<div style='background:#dcfce7;border-radius:8px;padding:6px 10px;font-size:12px;color:#166534;line-height:1.4;'>"+xe(p)+"</div>";
     });
-    h+="</div>";
+    h+="</div></div>";
   }
 
   dims.forEach(function(dim, di) {
     var lv = dim.lv;
-    var badgeColor = lv==="ok"?"color:#16a34a;background:#f0fdf4":lv==="bad"?"color:#dc2626;background:#fef2f2":"color:#d97706;background:#fffbeb";
-    var em = lv==="ok"?"✅ ":lv==="bad"?"❌ ":"⚠️ ";
-    h+="<div style='background:#fff;border-radius:12px;margin-bottom:8px;overflow:hidden;'>";
-    // 标题行
-    h+="<div style='display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;'>";
+    var headerBg = lv==="ok"?"#f0fdf4":lv==="bad"?"#fef2f2":"#fffbeb";
+    var headerBorder = lv==="ok"?"#bbf7d0":lv==="bad"?"#fecaca":"#fde68a";
+    var labelColor = lv==="ok"?"#15803d":lv==="bad"?"#dc2626":"#92400e";
+    var numBg = lv==="ok"?"#dcfce7":lv==="bad"?"#fee2e2":"#fef3c7";
+    var em = lv==="ok"?"✅":lv==="bad"?"❌":"⚠️";
+
+    h+="<div style='background:#fff;border-radius:12px;margin-bottom:8px;overflow:hidden;border:1px solid #f3f4f6;'>";
+
+    // 标题行带颜色背景
+    h+="<div style='display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:"+headerBg+";border-bottom:1px solid "+headerBorder+";'>";
     h+="<div style='display:flex;align-items:center;gap:10px;'>";
-    h+="<div style='width:28px;height:28px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:700;color:#374151;'>"+dim.num+"</div>";
-    h+="<div style='font-size:16px;font-weight:700;color:#111;'>"+xe(dim.q)+"</div>";
+    h+="<div style='width:26px;height:26px;border-radius:50%;background:"+numBg+";display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:"+labelColor+";'>"+dim.num+"</div>";
+    h+="<span style='font-size:15px;font-weight:700;color:#111;'>"+xe(dim.q)+"</span>";
     h+="</div>";
-    h+="<span style='font-size:12px;padding:3px 10px;border-radius:20px;"+badgeColor+"'>"+em+xe(dim.lb)+"</span>";
+    h+="<span style='font-size:13px;font-weight:700;color:"+labelColor+";'>"+em+" "+xe(dim.lb)+"</span>";
     h+="</div>";
 
     if (di < 3) {
-      // sub描述
-      if (dim.sub) h+="<div style='padding:0 16px 10px 54px;font-size:13px;color:#6b7280;line-height:1.5;'>"+xe(dim.sub)+"</div>";
-      // issue列表
       if (dim.issues.length > 0) {
-        h+="<div style='margin:0 16px 12px;'>";
-        dim.issues.forEach(function(issue) {
+        dim.issues.forEach(function(issue, ii) {
+          var isVeryCommon = (issue.common||"").indexOf("很常见")>=0;
           var isGood = (issue.impact||"").indexOf("无")>=0||(issue.impact||"").indexOf("不影响")>=0||(issue.impact||"").indexOf("正常")>=0;
-          var isBad = (issue.impact||"").indexOf("风险")>=0||(issue.impact||"").indexOf("隐患")>=0||(issue.impact||"").indexOf("影响大")>=0||(issue.impact||"").indexOf("需")>=0;
-          var affectsPrice = (issue.price||"").indexOf("无")< 0 && (issue.price||"").indexOf("直接")<0 && (issue.price||"")!=="";
-          var dotColor = isGood ? "#16a34a" : isBad ? "#dc2626" : "#d97706";
-          var textColor = isGood ? "#15803d" : isBad ? "#dc2626" : "#374151";
-          var commonColor = (issue.common||"").indexOf("极少见")>=0?"#dc2626":(issue.common||"").indexOf("不常见")>=0?"#d97706":(issue.common||"").indexOf("很常见")>=0?"#16a34a":"#9ca3af";
-          h+="<div style='display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid #f3f4f6;'>";
-          h+="<span style='width:6px;height:6px;border-radius:50%;background:"+dotColor+";flex-shrink:0;margin-top:5px;'></span>";
-          h+="<div style='flex:1;'>";
-          h+="<div style='display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px;'>";
-          h+="<span style='font-size:14px;font-weight:600;color:"+textColor+";'>"+xe(issue.name)+"</span>";
-          h+="<span style='font-size:11px;color:"+commonColor+";background:#f9fafb;padding:1px 6px;border-radius:4px;'>"+xe(issue.common||"")+"</span>";
-          if (affectsPrice) h+="<span style='font-size:11px;color:#b45309;background:#fffbeb;padding:1px 6px;border-radius:4px;'>影响售价</span>";
+          var isBad = !isGood && !isVeryCommon && ((issue.impact||"").indexOf("风险")>=0||(issue.impact||"").indexOf("隐患")>=0||(issue.impact||"").indexOf("影响大")>=0||(issue.common||"").indexOf("不常见")>=0||(issue.common||"").indexOf("极少见")>=0);
+          var affectsPrice = (issue.price||"")!=="" && (issue.price||"").indexOf("无")<0 && (issue.price||"").indexOf("直接")<0;
+
+          // 很常见的小问题整行灰色淡化
+          var rowOpacity = isVeryCommon && !affectsPrice ? "opacity:0.5;" : "";
+          var dotColor = isGood?"#16a34a":isBad?"#dc2626":"#f59e0b";
+          var nameColor = isGood?"#15803d":isBad?"#dc2626":"#374151";
+
+          h+="<div style='display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #f9fafb;"+rowOpacity+"'>";
+          h+="<span style='width:7px;height:7px;border-radius:50%;background:"+dotColor+";flex-shrink:0;'></span>";
+          h+="<div style='flex:1;min-width:0;'>";
+          h+="<div style='display:flex;align-items:center;gap:6px;flex-wrap:wrap;'>";
+          h+="<span style='font-size:14px;font-weight:600;color:"+nameColor+";'>"+xe(issue.name)+"</span>";
+          if (affectsPrice) h+="<span style='font-size:10px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;padding:1px 5px;border-radius:3px;font-weight:600;'>影响售价</span>";
           h+="</div>";
-          if (issue.impact) h+="<div style='font-size:12px;color:#6b7280;'>"+xe(issue.impact)+"</div>";
           if (issue.action) {
-            var isIgnore = issue.action.indexOf("忽略")>=0||issue.action.indexOf("无需")>=0||issue.action.indexOf("可忽略")>=0;
-            h+="<div style='font-size:12px;color:"+(isIgnore?"#16a34a":"#92400e")+";margin-top:3px;'>"+(isIgnore?"✓ ":"→ ")+xe(issue.action)+"</div>";
+            var isIgnore = issue.action.indexOf("忽略")>=0||issue.action.indexOf("无需")>=0||issue.action.indexOf("可忽略")>=0||isVeryCommon;
+            h+="<div style='font-size:12px;color:"+(isIgnore?"#9ca3af":"#92400e")+";margin-top:2px;'>"+(isIgnore?"可忽略":"→ "+xe(issue.action))+"</div>";
           }
           h+="</div></div>";
         });
-        h+="</div>";
-      } else if (!dim.sub) {
-        h+="<div style='padding:0 16px 12px 54px;font-size:13px;color:#9ca3af;'>暂无识别问题</div>";
+      } else {
+        h+="<div style='padding:10px 14px;font-size:13px;color:#9ca3af;'>✓ 未发现明显问题</div>";
       }
     } else {
-      // 第4维度：价格折损拆解
-      if (dim.sub) h+="<div style='padding:0 16px 10px 54px;font-size:13px;color:#6b7280;'>"+xe(dim.sub)+"</div>";
-      var deducts = d.price_deducts || [];
-      if (deducts.length > 0) {
-        h+="<div style='margin:0 16px 12px;background:#0d1117;border-radius:10px;padding:14px;'>";
-        deducts.forEach(function(item) {
-          var isCovered = item.status==="covered";
-          var statusColor = isCovered?"#4ade80":"#f87171";
-          var statusText = isCovered?"✅ 已覆盖":("⚠️ "+(item.extra||"未覆盖"));
-          h+="<div style='display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);'>";
-          h+="<span style='font-size:13px;color:rgba(255,255,255,.5);'>"+xe(item.name)+"</span>";
-          h+="<span style='font-size:12px;color:"+statusColor+";font-weight:600;'>"+xe(statusText)+"</span>";
-          h+="</div>";
-        });
-        h+="</div>";
+      // 第4步：价格结论
+      var priceSub = d.PRICE_SUB||"";
+      var priceFrom = d.PRICE_FROM||"";
+      var deducts = d.price_deducts||[];
+      var uncovered = deducts.filter(function(x){return x.status==="uncovered";});
+
+      h+="<div style='padding:12px 14px;'>";
+      if (lv==="ok") {
+        h+="<div style='font-size:14px;color:#15803d;font-weight:600;margin-bottom:6px;'>✅ 报价合理，可以直接谈</div>";
+        if (priceSub) h+="<div style='font-size:12px;color:#6b7280;'>"+xe(priceSub)+"</div>";
+      } else {
+        h+="<div style='font-size:14px;color:#92400e;font-weight:600;margin-bottom:6px;'>有压价空间</div>";
+        if (uncovered.length > 0) {
+          h+="<div style='font-size:12px;color:#6b7280;margin-bottom:8px;'>以下问题可作为压价依据：</div>";
+          uncovered.forEach(function(item) {
+            h+="<div style='display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f3f4f6;'>";
+            h+="<span style='font-size:13px;color:#374151;'>"+xe(item.name)+"</span>";
+            h+="<span style='font-size:12px;color:#dc2626;font-weight:600;'>"+xe(item.extra||"")+"</span>";
+            h+="</div>";
+          });
+        } else if (priceSub) {
+          h+="<div style='font-size:12px;color:#6b7280;'>"+xe(priceSub)+"</div>";
+        }
       }
+      h+="</div>";
     }
     h+="</div>";
   });
