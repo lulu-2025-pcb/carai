@@ -20,7 +20,7 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f1f1f1;color
 .proof-t{font-size:19px;color:rgba(255,150,150,.6);line-height:1.4;}
 /* BODY */
 .body1{padding:14px 14px 100px;}
-.price-input{background:#fff;border-radius:14px;padding:13px 16px;margin-bottom:12px;border-left:3px solid #fbbf24;}
+.price-input{background:#fff;border-radius:14px;padding:13px 16px;margin-bottom:12px;}
 .pi-label{font-size:19px;color:#9ca3af;margin-bottom:7px;}
 .pi-row{display:flex;align-items:center;gap:10px;}
 .pi-field{flex:1;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;font-size:18px;font-weight:700;color:#111;outline:none;}
@@ -260,11 +260,11 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f1f1f1;color
 <div class="page" id="p2">
   <div class="blk1">
     <div class="b1-eye">AI 购车判断 · 免费版</div>
-    <div style="font-size:16px;font-weight:500;color:rgba(248,113,113,0.85);margin-bottom:10px;margin-top:4px;" id="fHook">⚠️ 这车可能不止表面价格</div>
+    <div style="font-size:15px;font-weight:500;color:rgba(248,113,113,0.85);margin-bottom:10px;margin-top:4px;" id="fHook">⚠️ 这车可能不止表面价格</div>
     <div class="b1-rows">
       <div class="b1-row"><span class="b1-label">发现关键问题</span><span class="b1-val v-red" id="fN">-</span></div>
-      <div class="b1-row"><span class="b1-label">议价空间</span><span class="b1-val v-amber" id="fS">存在（需专业判断）</span></div>
-      <div class="b1-row"><span class="b1-label">后期成本</span><span class="b1-val v-red" id="fC">偏高（需注意）</span></div>
+      <div class="b1-row"><span class="b1-label">议价空间</span><span class="b1-val v-amber" id="fS">-</span></div>
+      <div class="b1-row"><span class="b1-label">后期成本</span><span class="b1-val v-red" id="fC">-</span></div>
     </div>
   </div>
   <div class="blk2" id="fDims"></div>
@@ -294,7 +294,7 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f1f1f1;color
     <div class="qr-card">
       <div class="qr-t">扫码支付宝付款</div>
       <div class="qr-s">付款后点我已付款解锁</div>
-      <img src="https://lulu-2025-pcb.github.io/carai/qr.jpg" style="width:150px;height:150px;border-radius:10px;display:block;margin:0 auto 14px;">
+      <img src="qr.jpg" style="width:150px;height:150px;border-radius:10px;display:block;margin:0 auto 14px;">
     </div>
   </div>
   <div class="pay-cta">
@@ -306,21 +306,21 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f1f1f1;color
 <!-- 19.9结果 -->
 <div class="page" id="p3">
   <div class="blk1">
-    <div class="b1-eye">AI 购车分析 · ¥19.9 已解锁</div>
+    <div class="b1-eye">报告解读 · ¥19.9已解锁</div>
     <div style="font-size:13px;color:rgba(255,255,255,.45);margin-bottom:12px;" id="dVsub">这些问题，你该担心多少？</div>
     <div class="b1-rows">
-      <div class="b1-row"><span class="b1-label">后期养车：比同类车</span><span class="b1-val v-red" id="dC">-</span></div>
-      <div class="b1-row"><span class="b1-label">这次买车：存在议价空间</span><span class="b1-val v-amber" id="dS">-</span></div>
-      <div class="b1-row"><span class="b1-label">发现关键问题</span><span class="b1-val v-amber" id="dN">-</span></div>
+      <div class="b1-row"><span class="b1-label">发现关键问题</span><span class="b1-val v-red" id="dN">-</span></div>
+      <div class="b1-row"><span class="b1-label">后期成本</span><span class="b1-val v-red" id="dC">-</span></div>
+      <div class="b1-row"><span class="b1-label">价格</span><span class="b1-val v-amber" id="dS">-</span></div>
     </div>
   </div>
   <div class="blk2" id="dDims"></div>
   <div class="cant-do">
-    <div class="cd-t">⚠️ 光知道有空间，不等于能谈下来</div>
-    <div class="cd-b">这些问题可以作为压价依据<br>但<b>该出多少、怎么开口、对方拒绝怎么办</b><br>这些你还不知道</div>
+    <div class="cd-t">⚠️ 知道严不严重了，然后呢？</div>
+    <div class="cd-b">出价多少、怎么开口——在¥199里<br>已付¥19.9直接抵扣</div>
   </div>
   <div class="cta-fixed">
-    <button class="btn-amber" id="btnUnlock999" data-go="p4f">我帮你把这单谈成 ¥199 →</button>
+    <button class="btn-amber" id="btnUnlock999" data-go="p4f">告诉我该怎么说 ¥179.1 →</button>
     <button class="btn-ghost" data-go="p2">← 返回</button>
   </div>
 </div>
@@ -346,7 +346,7 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f1f1f1;color
     <div class="qr-card">
       <div class="qr-t">扫码支付宝付款</div>
       <div class="qr-s">付款后点我已付款解锁</div>
-      <img src="https://lulu-2025-pcb.github.io/carai/qr.jpg" style="width:150px;height:150px;border-radius:10px;display:block;margin:0 auto 14px;">
+      <img src="qr.jpg" style="width:150px;height:150px;border-radius:10px;display:block;margin:0 auto 14px;">
     </div>
   </div>
   <div class="pay-cta">
@@ -529,12 +529,12 @@ function deepDims(d) {
         h+="<div style='font-size:13px;font-weight:600;color:"+commonColor+";'>"+xe(issue.common)+"</div></div>";
         // col2: 影响本维度
         var col2val = di===0 ? issue.safety : di===1 ? issue.cost : issue.cost;
-        var col2Color = col2val.indexOf("无")>=0||col2val.indexOf("小")>=0 ? "#9ca3af" : col2val.indexOf("大")>=0 ? "#dc2626" : "#d97706";
+        var col2Color = (col2val.indexOf("无")>=0||col2val.indexOf("小")>=0||col2val.indexOf("直接")>=0) ? "#9ca3af" : (col2val.indexOf("大")>=0||col2val.indexOf("高")>=0||col2val.indexOf("隐患")>=0) ? "#dc2626" : "#d97706";
         h+="<div style='flex:1;text-align:center;padding:7px 4px;background:#f9fafb;border-radius:6px;'>";
         h+="<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>"+xe(dim.col2)+"</div>";
         h+="<div style='font-size:13px;font-weight:600;color:"+col2Color+";'>"+xe(col2val)+"</div></div>";
         // col3: 影响定价
-        var priceColor = issue.price.indexOf("无")>=0||issue.price.indexOf("小")>=0 ? "#9ca3af" : "#dc2626";
+        var priceColor = (issue.price.indexOf("无")>=0||issue.price.indexOf("小")>=0||issue.price.indexOf("直接")>=0) ? "#9ca3af" : "#dc2626";
         h+="<div style='flex:1;text-align:center;padding:7px 4px;background:#f9fafb;border-radius:6px;'>";
         h+="<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>影响定价</div>";
         h+="<div style='font-size:13px;font-weight:600;color:"+priceColor+";'>"+xe(issue.price)+"</div></div>";
@@ -543,20 +543,13 @@ function deepDims(d) {
       });
       h+="</div>"; // border box
     } else if (di === 3) {
-      // 价格维度：显示建议成交价
-      var sp = d.SUGGEST_PRICE || "";
-      var mr = d.MARKET_RANGE || "";
-      if (sp && sp !== "不建议购买") {
-        h+="<div style='margin:0 16px 12px;background:#0d1117;border-radius:10px;padding:16px;border:1.5px solid rgba(251,191,36,.3);'>";
-        h+="<div style='font-size:12px;color:rgba(251,191,36,.5);margin-bottom:6px;'>综合车况 + 市场参考</div>";
-        h+="<div style='display:flex;align-items:baseline;gap:10px;margin-bottom:4px;'>";
-        h+="<span style='font-size:32px;font-weight:700;color:#fbbf24;line-height:1;'>"+xe(sp)+"</span>";
-        h+="<span style='font-size:14px;color:rgba(255,255,255,.35);'>建议成交价</span></div>";
-        if (mr) h+="<div style='font-size:12px;color:rgba(255,255,255,.25);'>"+xe(mr)+"</div>";
-        h+="</div>";
-      } else {
-        h+="<div style='padding:6px 16px 14px 58px;font-size:15px;color:#9ca3af;'>需进一步判断</div>";
-      }
+      // 19.9价格维度：显示存在空间但建议出价锁定
+      var pSub = d.PRICE_SUB || "存在议价空间";
+      h+="<div style='padding:4px 16px 8px 58px;font-size:15px;color:#9ca3af;'>"+xe(pSub)+"</div>";
+      h+="<div style='margin:0 16px 12px;display:flex;justify-content:space-between;align-items:center;background:#fafafa;border-top:1px dashed #e5e7eb;padding:10px 14px;'>";
+      h+="<span style='font-size:13px;color:#9ca3af;'>建议出价 + 谈判话术</span>";
+      h+="<button style='background:linear-gradient(135deg,#d97706,#b45309);color:#fff;border-radius:20px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;border:none;' onclick=\"document.querySelector('[data-go=p4f]')&&document.querySelector('[data-go=p4f]').click()\">¥179.1 解锁</button>";
+      h+="</div>";
     } else {
       var subText = dim.sub || "暂无识别问题";
       h+="<div style='padding:4px 16px 14px 58px;font-size:15px;color:#9ca3af;'>"+xe(subText)+"</div>";
@@ -595,16 +588,18 @@ function fullDims(d) {
         h+="<div style='padding:10px 14px;'>";
         h+="<div style='font-size:16px;font-weight:600;color:#111;margin-bottom:9px;'>"+xe(issue.name)+"</div>";
         h+="<div style='display:flex;gap:6px;'>";
-        var commonColor = (issue.common||"").indexOf("不常见")>=0||(issue.common||"").indexOf("极少见")>=0 ? "#dc2626" : "#d97706";
+        var commonColor = (issue.common||"").indexOf("极少见")>=0 ? "#dc2626" :
+                          (issue.common||"").indexOf("不常见")>=0 ? "#d97706" :
+                          (issue.common||"").indexOf("很常见")>=0 ? "#16a34a" : "#9ca3af";
         h+="<div style='flex:1;text-align:center;padding:7px 4px;background:#f9fafb;border-radius:6px;'>";
         h+="<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>常见程度</div>";
         h+="<div style='font-size:13px;font-weight:600;color:"+commonColor+";'>"+xe(issue.common||"")+"</div></div>";
         var col2val = di===0 ? (issue.safety||"") : (issue.cost||"");
-        var col2Color = (col2val.indexOf("无")>=0||col2val.indexOf("小")>=0) ? "#9ca3af" : (col2val.indexOf("大")>=0||col2val.indexOf("高")>=0) ? "#dc2626" : "#d97706";
+        var col2Color = (col2val.indexOf("无")>=0||col2val.indexOf("小")>=0||col2val.indexOf("直接")>=0) ? "#9ca3af" : (col2val.indexOf("大")>=0||col2val.indexOf("高")>=0||col2val.indexOf("隐患")>=0) ? "#dc2626" : "#d97706";
         h+="<div style='flex:1;text-align:center;padding:7px 4px;background:#f9fafb;border-radius:6px;'>";
         h+="<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>"+xe(dim.col2)+"</div>";
         h+="<div style='font-size:13px;font-weight:600;color:"+col2Color+";'>"+xe(col2val)+"</div></div>";
-        var priceColor = (issue.price||"").indexOf("无")>=0||(issue.price||"").indexOf("小")>=0 ? "#9ca3af" : "#dc2626";
+        var priceColor = (issue.price||"").indexOf("无")>=0||(issue.price||"").indexOf("小")>=0||(issue.price||"").indexOf("直接")>=0 ? "#9ca3af" : "#dc2626";
         h+="<div style='flex:1;text-align:center;padding:7px 4px;background:#f9fafb;border-radius:6px;'>";
         h+="<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>影响定价</div>";
         h+="<div style='font-size:13px;font-weight:600;color:"+priceColor+";'>"+xe(issue.price||"")+"</div></div>";
@@ -641,27 +636,33 @@ function renderAll(d) {
   if(fVel){fVel.innerHTML=verdict;fVel.className="b1-verdict "+vc(color,verdictText);}
   var totalIssues = (d.safety_issues||[]).length + (d.cost_issues||[]).length + (d.resale_issues||[]).length;
   var issueCount = d.ISSUE_COUNT || (totalIssues > 0 ? String(totalIssues) : "0");
-  document.getElementById("fN").textContent=issueCount+" 个（影响价格）";
+  var fNel = document.getElementById("fN");
+  if(fNel){
+    fNel.textContent=issueCount+" 个（影响价格）";
+    fNel.className="b1-val "+(parseInt(issueCount)===0?"v-green":parseInt(issueCount)>=3?"v-red":"v-amber");
+  }
   var hookEl=document.getElementById("fHook");
   if(hookEl){hookEl.textContent=(d.VERDICT_COLOR==="red")?"⚠️ 这车建议放弃":"⚠️ 这车可能不止表面价格";}
   var fCel=document.getElementById("fC");
-  if(fCel){fCel.textContent=d.COST_RISK_TEXT||"偏高（需注意）";}
+  if(fCel){
+    fCel.textContent=d.COST_RISK_TEXT||(d.COST_LEVEL==="ok"?"后期成本正常（无明显风险）":"偏高（需注意）");
+    fCel.className="b1-val "+(d.COST_LEVEL==="ok"?"v-green":d.COST_LEVEL==="bad"?"v-red":"v-amber");
+  }
   var fSel=document.getElementById("fS");
-  if(fSel){fSel.textContent=d.PRICE_TEXT||"存在（需专业判断）";}
+  if(fSel){
+    fSel.textContent=d.PRICE_TEXT||(d.PRICE_LEVEL==="ok"?"报价合理":"偏高，有空间");
+    fSel.className="b1-val "+(d.PRICE_LEVEL==="ok"?"v-green":d.PRICE_LEVEL==="bad"?"v-red":"v-amber");
+  }
   document.getElementById("fDims").innerHTML=freeDims(d);
 
-  // verdict title removed from 19.9 page
+  // 19.9版
   var dVsub = document.getElementById("dVsub");
   if(dVsub) dVsub.textContent = d.VERDICT_SUB || "报告解读已完成";
-  // 19.9版只显示定性描述，不显示具体金额
-  var costRisk = d.COST_RISK||"有额外支出风险";
-  var priceSaving = d.PRICE_SAVING||"明显，但需要依据";
-  // 去掉具体数字，只保留定性描述
-  costRisk = costRisk.replace(/\d+[-~]\d+元/g,"有风险").replace(/\d+元/g,"有风险").replace(/\d+万/g,"有风险");
-  priceSaving = priceSaving.replace(/可少付约?\d+[-~]?\d*元/g,"有空间，解锁查看").replace(/可少付约?\d+[-~]?\d*万/g,"有空间，解锁查看").replace(/\d+[-~]\d+元/g,"有空间").replace(/\d+万/g,"有空间");
-  var dCel=document.getElementById("dC");if(dCel)dCel.textContent=costRisk;
-  var dSel=document.getElementById("dS");if(dSel)dSel.textContent=priceSaving;
   var dNel=document.getElementById("dN");if(dNel)dNel.textContent=(d.ISSUE_COUNT||"0")+" 个";
+  var dCel=document.getElementById("dC");
+  if(dCel){dCel.textContent=d.COST_LABEL||(d.COST_LEVEL==="ok"?"正常":"存在风险");}
+  var dSel=document.getElementById("dS");
+  if(dSel){dSel.textContent=d.PRICE_LEVEL==="ok"?"报价合理":"需进一步判断";}
   document.getElementById("dDims").innerHTML=deepDims(d);
 
   // verdict title removed from 199 page
