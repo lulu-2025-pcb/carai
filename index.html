@@ -258,18 +258,13 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f1f1f1;color
 
 <!-- 免费结果 -->
 <div class="page" id="p2">
-  <div class="blk1">
-    <div class="b1-eye">AI 购车判断 · 免费版</div>
-    <div style="font-size:15px;font-weight:500;color:rgba(248,113,113,0.85);margin-bottom:10px;margin-top:4px;" id="fHook">⚠️ 这车可能不止表面价格</div>
-    <div class="b1-rows">
-      <div class="b1-row"><span class="b1-label">能不能放心开</span><span class="b1-val" id="fSafety">-</span></div>
-      <div class="b1-row"><span class="b1-label">以后会不会多花钱</span><span class="b1-val" id="fCost">-</span></div>
-      <div class="b1-row"><span class="b1-label">以后卖会不会亏</span><span class="b1-val" id="fResale">-</span></div>
-    </div>
+  <div style="background:#0d1117;padding:40px 16px 16px;">
+    <div style="font-size:12px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,.3);margin-bottom:8px;">AI 购车判断 · 免费版</div>
+    <div style="font-size:15px;font-weight:600;color:rgba(248,113,113,0.9);margin-bottom:16px;" id="fHook">AI已完成车况分析</div>
+    <div id="fDims"></div>
   </div>
-  <div class="blk2" id="fDims"></div>
   <div class="cta-fixed">
-    <button class="btn-amber" data-go="p4f">看每个问题具体是什么 ¥99 →</button>
+    <button class="btn-amber" data-go="p4f">解锁完整分析 ¥99 →</button>
     <button class="btn-ghost" data-go="p0">← 重新上传</button>
   </div>
 </div>
@@ -305,27 +300,24 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f1f1f1;color
   </div>
 </div>
 
-<!-- 199结果 -->
+<!-- 99结果 -->
 <div class="page" id="p4">
-  <div class="blk1">
-    <div class="b1-eye">AI 完整决策方案 · ¥99 已解锁</div>
-    <div class="b1-sub" id="fullSub" style="font-size:14px;color:rgba(255,255,255,.5);margin-bottom:4px;"></div>
+  <div style="background:#0d1117;padding:40px 16px 16px;">
+    <div style="font-size:12px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,.3);margin-bottom:8px;">AI 完整决策方案 · ¥99 已解锁</div>
+    <div class="b1-sub" id="fullSub" style="font-size:14px;color:rgba(255,255,255,.5);margin-bottom:12px;"></div>
     <div class="b1-rows">
       <div class="b1-row"><span class="b1-label">卖家报价</span><span class="b1-val v-red" id="fullFrom">-</span></div>
-      <div class="b1-row"><span class="b1-label">理论合理价</span><span class="b1-val v-green" id="fullP">-</span></div>
       <div class="b1-row"><span class="b1-label">价格判断</span><span class="b1-val" id="fullPrice">-</span></div>
     </div>
   </div>
 
-  <div class="blk2" id="fullDims"></div>
-  <div id="fullTalks"></div>
-  <div id="fullActions"></div>
+  <div style="padding:8px 10px 0;" id="fullDims"></div>
   <div id="fullQuits"></div>
   <div class="pb100"></div>
   <div class="cta-fixed">
     <div class="btn-row">
       <button class="btn-sm-g" data-go="p0">← 重新分析</button>
-      <button class="btn-sm-s">联系顾问跟进 →</button>
+      <button class="btn-sm-s" id="btnContact">联系顾问跟进 →</button>
     </div>
   </div>
 </div>
@@ -336,6 +328,15 @@ var API = "https://api.ailulu.me/analyze";
 
 var uploadedFiles = [];
 var RES = {};
+
+function toggleDim(id) {
+  var el = document.getElementById(id);
+  var arrow = document.getElementById(id+"_arrow");
+  if (!el) return;
+  var isOpen = el.style.display !== "none";
+  el.style.display = isOpen ? "none" : "block";
+  if (arrow) arrow.textContent = isOpen ? "▶" : "▼";
+}
 
 function go(id) {
   document.querySelectorAll(".page").forEach(function(p) { p.classList.remove("active"); });
@@ -425,33 +426,35 @@ function freeDims(d) {
     {num:"3",q:"以后卖会不会亏",lv:d.RESALE_LEVEL||"warn",lb:d.RESALE_LABEL||"有风险",sub:d.RESALE_SUB||""},
   ];
   var h="";
-  dims.forEach(function(dim) {
-    var badgeColor = dim.lv==="ok" ? "color:#16a34a;background:#f0fdf4" :
-                     dim.lv==="bad" ? "color:#dc2626;background:#fef2f2" :
-                     "color:#d97706;background:#fffbeb";
-    h+="<div style='background:#fff;border-radius:12px;margin-bottom:7px;overflow:hidden;'>";
-    h+="<div style='display:flex;align-items:center;justify-content:space-between;padding:14px 16px 8px;'>";
-    h+="<div style='display:flex;align-items:center;gap:12px;'>";
-    h+="<div style='width:30px;height:30px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;font-weight:700;color:#374151;'>"+dim.num+"</div>";
-    h+="<div style='font-size:18px;font-weight:700;color:#111;'>"+xe(dim.q)+"</div>";
+  dims.forEach(function(dim, di) {
+    var badgeColor = dim.lv==="ok" ? "#4ade80" : dim.lv==="bad" ? "#f87171" : "#fbbf24";
+    var uid = "fdim_"+di;
+    h+="<div style='border-bottom:1px solid rgba(255,255,255,.07);'>";
+    h+="<div onclick='toggleDim(\""+uid+"\")' style='display:flex;align-items:center;justify-content:space-between;padding:14px 0;cursor:pointer;'>";
+    h+="<div style='display:flex;align-items:center;gap:10px;'>";
+    h+="<span style='font-size:13px;color:rgba(255,255,255,.3);font-weight:700;'>"+dim.num+"</span>";
+    h+="<span style='font-size:16px;font-weight:700;color:#fff;'>"+xe(dim.q)+"</span>";
     h+="</div>";
-    h+="<span style='font-size:13px;padding:3px 12px;border-radius:20px;white-space:nowrap;"+badgeColor+"'>"+xe(dim.lb)+"</span>";
+    h+="<div style='display:flex;align-items:center;gap:8px;'>";
+    h+="<span style='font-size:12px;font-weight:700;color:"+badgeColor+";'>"+xe(dim.lb)+"</span>";
+    h+="<span style='font-size:12px;color:rgba(255,255,255,.25);' id='"+uid+"_arrow'>▶</span>";
+    h+="</div></div>";
+    // 展开内容
+    h+="<div id='"+uid+"' style='display:none;padding-bottom:12px;'>";
+    if (dim.sub) h+="<div style='font-size:13px;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:8px;'>"+xe(dim.sub)+"</div>";
+    h+="<div style='font-size:12px;color:rgba(255,255,255,.25);'>解锁查看每个具体问题 →</div>";
     h+="</div>";
-    if (dim.sub) h+="<div style='padding:2px 16px 14px 58px;font-size:15px;color:#9ca3af;'>"+xe(dim.sub)+"</div>";
-    else h+="<div style='padding:0 16px 12px;'></div>";
     h+="</div>";
   });
-  // 第4维度：价格，完全锁定
-  h+="<div style='background:#fff;border-radius:12px;margin-bottom:7px;overflow:hidden;'>";
-  h+="<div style='display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;'>";
-  h+="<div style='display:flex;align-items:center;gap:12px;'>";
-  h+="<div style='width:30px;height:30px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;font-weight:700;color:#374151;'>4</div>";
-  h+="<div style='font-size:18px;font-weight:700;color:#111;'>现在买贵了吗</div>";
+  // 第4维度锁定
+  h+="<div style='border-bottom:1px solid rgba(255,255,255,.07);'>";
+  h+="<div style='display:flex;align-items:center;justify-content:space-between;padding:14px 0;'>";
+  h+="<div style='display:flex;align-items:center;gap:10px;'>";
+  h+="<span style='font-size:13px;color:rgba(255,255,255,.3);font-weight:700;'>4</span>";
+  h+="<span style='font-size:16px;font-weight:700;color:#fff;'>现在买贵了吗</span>";
   h+="</div>";
-  h+="<span style='font-size:13px;padding:3px 12px;border-radius:20px;color:#9ca3af;background:#f3f4f6;'>🔒 解锁查看</span>";
-  h+="</div>";
-  h+="<div style='padding:4px 16px 12px 58px;font-size:13px;color:#9ca3af;'>报价是否覆盖车况折损，需解锁查看</div>";
-  h+="</div>";
+  h+="<span style='font-size:12px;color:rgba(255,255,255,.3);'>🔒 解锁</span>";
+  h+="</div></div>";
   return h;
 }
 
@@ -518,111 +521,86 @@ function deepDims(d) {
 
 function fullDims(d) {
   var dims=[
-    {num:"1",q:"能不能放心开",lv:d.SAFETY_LEVEL||"warn",lb:d.SAFETY_LABEL||"需关注",sub:d.SAFETY_SUB||"",issues:d.safety_issues||[],col2:"影响安全"},
-    {num:"2",q:"以后会不会多花钱",lv:d.COST_LEVEL||"warn",lb:d.COST_LABEL||"需注意",sub:d.COST_SUB||"",issues:d.cost_issues||[],col2:"影响养车"},
-    {num:"3",q:"以后卖会不会亏",lv:d.RESALE_LEVEL||"warn",lb:d.RESALE_LABEL||"有风险",sub:d.RESALE_SUB||"",issues:d.resale_issues||[],col2:"影响保值"},
-    {num:"4",q:"现在买贵了吗",lv:d.PRICE_LEVEL||"warn",lb:d.PRICE_LABEL||"报价偏高",sub:d.PRICE_SUB||"",issues:[],col2:""}
+    {num:"1",q:"能不能放心开",lv:d.SAFETY_LEVEL||"warn",lb:d.SAFETY_LABEL||"需关注",sub:d.SAFETY_SUB||"",issues:d.safety_issues||[]},
+    {num:"2",q:"以后会不会多花钱",lv:d.COST_LEVEL||"warn",lb:d.COST_LABEL||"需注意",sub:d.COST_SUB||"",issues:d.cost_issues||[]},
+    {num:"3",q:"以后卖会不会亏",lv:d.RESALE_LEVEL||"warn",lb:d.RESALE_LABEL||"有风险",sub:d.RESALE_SUB||"",issues:d.resale_issues||[]},
+    {num:"4",q:"现在买贵了吗",lv:d.PRICE_LEVEL||"warn",lb:d.PRICE_LABEL||"报价偏高",sub:d.PRICE_SUB||"",issues:[]}
   ];
   var h="";
-  // 优势展示
+
+  // 亮点区块
   if (d.plus && d.plus.length > 0) {
-    h+="<div style='background:#f0fdf4;border-radius:12px;margin-bottom:7px;padding:14px 16px;border:1px solid #bbf7d0;'>";
+    h+="<div style='background:#f0fdf4;border-radius:12px;margin-bottom:8px;padding:14px 16px;border:1px solid #bbf7d0;'>";
     h+="<div style='font-size:13px;font-weight:700;color:#15803d;margin-bottom:8px;'>✅ 这辆车的亮点</div>";
     d.plus.forEach(function(p) {
-      h+="<div style='font-size:13px;color:#166534;padding:5px 0;border-bottom:1px solid rgba(34,197,94,.12);line-height:1.5;'>· "+xe(p)+"</div>";
+      h+="<div style='font-size:13px;color:#166534;padding:5px 0;border-bottom:1px solid rgba(34,197,94,.12);line-height:1.5;'>"+xe(p)+"</div>";
     });
     h+="</div>";
   }
+
   dims.forEach(function(dim, di) {
-    var badgeColor = dim.lv==="ok" ? "color:#16a34a;background:#f0fdf4" :
-                     dim.lv==="bad" ? "color:#dc2626;background:#fef2f2" :
-                     "color:#d97706;background:#fffbeb";
-    var em = dim.lv==="ok" ? "✅ " : dim.lv==="bad" ? "❌ " : "⚠️ ";
-    h+="<div style='background:#fff;border-radius:12px;margin-bottom:7px;overflow:hidden;'>";
+    var lv = dim.lv;
+    var badgeColor = lv==="ok"?"color:#16a34a;background:#f0fdf4":lv==="bad"?"color:#dc2626;background:#fef2f2":"color:#d97706;background:#fffbeb";
+    var em = lv==="ok"?"✅ ":lv==="bad"?"❌ ":"⚠️ ";
+    h+="<div style='background:#fff;border-radius:12px;margin-bottom:8px;overflow:hidden;'>";
+    // 标题行
     h+="<div style='display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;'>";
-    h+="<div style='display:flex;align-items:center;gap:12px;'>";
-    h+="<div style='width:30px;height:30px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;font-weight:700;color:#374151;'>"+dim.num+"</div>";
-    h+="<div style='font-size:18px;font-weight:700;color:#111;'>"+xe(dim.q)+"</div>";
+    h+="<div style='display:flex;align-items:center;gap:10px;'>";
+    h+="<div style='width:28px;height:28px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:700;color:#374151;'>"+dim.num+"</div>";
+    h+="<div style='font-size:16px;font-weight:700;color:#111;'>"+xe(dim.q)+"</div>";
     h+="</div>";
-    h+="<span style='font-size:13px;padding:3px 12px;border-radius:20px;white-space:nowrap;"+badgeColor+"'>"+em+xe(dim.lb)+"</span>";
+    h+="<span style='font-size:12px;padding:3px 10px;border-radius:20px;"+badgeColor+"'>"+em+xe(dim.lb)+"</span>";
     h+="</div>";
-    if (di < 3 && dim.issues.length > 0) {
-      h+="<div style='margin:0 16px 12px;border:0.5px solid #f3f4f6;border-radius:10px;overflow:hidden;'>";
-      dim.issues.forEach(function(issue, ii) {
-        if (ii > 0) h+="<div style='height:0.5px;background:#f3f4f6;'></div>";
-        h+="<div style='padding:10px 14px;'>";
-        h+="<div style='font-size:14px;font-weight:600;color:#111;margin-bottom:6px;'>"+xe(issue.name)+"</div>";
-        // 常见程度badge
-        var commonColor = (issue.common||"").indexOf("极少见")>=0 ? "#dc2626" :
-                          (issue.common||"").indexOf("不常见")>=0 ? "#d97706" :
-                          (issue.common||"").indexOf("很常见")>=0 ? "#16a34a" : "#9ca3af";
-        var commonBg = (issue.common||"").indexOf("极少见")>=0 ? "#fef2f2" :
-                       (issue.common||"").indexOf("不常见")>=0 ? "#fffbeb" :
-                       (issue.common||"").indexOf("很常见")>=0 ? "#f0fdf4" : "#f3f4f6";
-        h+="<span style='font-size:11px;font-weight:600;color:"+commonColor+";background:"+commonBg+";padding:2px 7px;border-radius:4px;margin-bottom:6px;display:inline-block;'>"+xe(issue.common||"")+"</span>";
-        // 影响描述
-        if (issue.impact) {
-          var impactColor = (issue.impact.indexOf("无")>=0||issue.impact.indexOf("小")>=0||issue.impact.indexOf("直接")>=0) ? "#9ca3af" : (issue.impact.indexOf("大")>=0||issue.impact.indexOf("高")>=0||issue.impact.indexOf("隐患")>=0||issue.impact.indexOf("风险")>=0) ? "#dc2626" : "#374151";
-          h+="<div style='font-size:13px;color:"+impactColor+";margin-bottom:4px;'>"+xe(issue.impact)+"</div>";
-        }
-        // 行动建议（199专属）
-        if (issue.action && issue.action.trim()) {
-          var isIgnore = issue.action.indexOf("忽略")>=0||issue.action.indexOf("无需")>=0||issue.action.indexOf("不影响")>=0;
-          var actionBg = isIgnore ? "#f0fdf4" : "#fffbeb";
-          var actionColor = isIgnore ? "#16a34a" : "#92400e";
-          var actionIcon = isIgnore ? "✓" : "→";
-          h+="<div style='font-size:12px;color:"+actionColor+";background:"+actionBg+";padding:5px 8px;border-radius:6px;margin-top:4px;'>"+actionIcon+" "+xe(issue.action)+"</div>";
-        }
+
+    if (di < 3) {
+      // sub描述
+      if (dim.sub) h+="<div style='padding:0 16px 10px 54px;font-size:13px;color:#6b7280;line-height:1.5;'>"+xe(dim.sub)+"</div>";
+      // issue列表
+      if (dim.issues.length > 0) {
+        h+="<div style='margin:0 16px 12px;'>";
+        dim.issues.forEach(function(issue) {
+          var isGood = (issue.impact||"").indexOf("无")>=0||(issue.impact||"").indexOf("不影响")>=0||(issue.impact||"").indexOf("正常")>=0;
+          var isBad = (issue.impact||"").indexOf("风险")>=0||(issue.impact||"").indexOf("隐患")>=0||(issue.impact||"").indexOf("影响大")>=0||(issue.impact||"").indexOf("需")>=0;
+          var affectsPrice = (issue.price||"").indexOf("无")< 0 && (issue.price||"").indexOf("直接")<0 && (issue.price||"")!=="";
+          var dotColor = isGood ? "#16a34a" : isBad ? "#dc2626" : "#d97706";
+          var textColor = isGood ? "#15803d" : isBad ? "#dc2626" : "#374151";
+          var commonColor = (issue.common||"").indexOf("极少见")>=0?"#dc2626":(issue.common||"").indexOf("不常见")>=0?"#d97706":(issue.common||"").indexOf("很常见")>=0?"#16a34a":"#9ca3af";
+          h+="<div style='display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid #f3f4f6;'>";
+          h+="<span style='width:6px;height:6px;border-radius:50%;background:"+dotColor+";flex-shrink:0;margin-top:5px;'></span>";
+          h+="<div style='flex:1;'>";
+          h+="<div style='display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px;'>";
+          h+="<span style='font-size:14px;font-weight:600;color:"+textColor+";'>"+xe(issue.name)+"</span>";
+          h+="<span style='font-size:11px;color:"+commonColor+";background:#f9fafb;padding:1px 6px;border-radius:4px;'>"+xe(issue.common||"")+"</span>";
+          if (affectsPrice) h+="<span style='font-size:11px;color:#b45309;background:#fffbeb;padding:1px 6px;border-radius:4px;'>影响售价</span>";
+          h+="</div>";
+          if (issue.impact) h+="<div style='font-size:12px;color:#6b7280;'>"+xe(issue.impact)+"</div>";
+          if (issue.action) {
+            var isIgnore = issue.action.indexOf("忽略")>=0||issue.action.indexOf("无需")>=0||issue.action.indexOf("可忽略")>=0;
+            h+="<div style='font-size:12px;color:"+(isIgnore?"#16a34a":"#92400e")+";margin-top:3px;'>"+(isIgnore?"✓ ":"→ ")+xe(issue.action)+"</div>";
+          }
+          h+="</div></div>";
+        });
         h+="</div>";
-      });
-      h+="</div>";
-    } else if (di === 3) {
-      var sp = d.SUGGEST_PRICE || "";
-      var priceNew = d.PRICE_NEW || "";
-      var priceFrom = d.PRICE_FROM || d.price_from || "";
+      } else if (!dim.sub) {
+        h+="<div style='padding:0 16px 12px 54px;font-size:13px;color:#9ca3af;'>暂无识别问题</div>";
+      }
+    } else {
+      // 第4维度：价格折损拆解
+      if (dim.sub) h+="<div style='padding:0 16px 10px 54px;font-size:13px;color:#6b7280;'>"+xe(dim.sub)+"</div>";
       var deducts = d.price_deducts || [];
-      if (sp && sp !== "不建议购买") {
-        h+="<div style='margin:0 16px 12px;background:#0d1117;border-radius:10px;padding:16px;border:1.5px solid rgba(251,191,36,.3);'>";
-        // 新车价行
-        if (priceNew) {
-          h+="<div style='display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);'>";
-          h+="<span style='font-size:13px;color:rgba(255,255,255,.4);'>新车指导价</span>";
-          h+="<span style='font-size:14px;font-weight:700;color:rgba(255,255,255,.6);'>"+xe(priceNew)+"</span></div>";
-        }
-        // 折损拆解
+      if (deducts.length > 0) {
+        h+="<div style='margin:0 16px 12px;background:#0d1117;border-radius:10px;padding:14px;'>";
         deducts.forEach(function(item) {
-          var isCovered = item.status === "covered";
-          var statusColor = isCovered ? "#4ade80" : "#f87171";
-          var statusText = item.extra || (isCovered ? "✅ 已覆盖" : "⚠️ 未覆盖");
-          if (!isCovered && item.extra) statusText = "⚠️ " + item.extra;
-          else if (isCovered) statusText = "✅ 已覆盖";
-          h+="<div style='display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);'>";
-          h+="<span style='font-size:13px;color:rgba(255,255,255,.45);'>"+xe(item.name)+"</span>";
+          var isCovered = item.status==="covered";
+          var statusColor = isCovered?"#4ade80":"#f87171";
+          var statusText = isCovered?"✅ 已覆盖":("⚠️ "+(item.extra||"未覆盖"));
+          h+="<div style='display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);'>";
+          h+="<span style='font-size:13px;color:rgba(255,255,255,.5);'>"+xe(item.name)+"</span>";
           h+="<span style='font-size:12px;color:"+statusColor+";font-weight:600;'>"+xe(statusText)+"</span>";
           h+="</div>";
         });
-        // 分割线
-        h+="<div style='height:1px;background:rgba(251,191,36,.2);margin:10px 0;'></div>";
-        // 理论合理价
-        h+="<div style='display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;'>";
-        h+="<span style='font-size:12px;color:rgba(251,191,36,.6);'>理论合理价</span>";
-        h+="<span style='font-size:26px;font-weight:700;color:#fbbf24;line-height:1;'>"+xe(sp)+"</span></div>";
-        // 当前报价对比
-        if (priceFrom) {
-          var priceFromNum = parseFloat(priceFrom);
-          var priceSpNum = parseFloat(sp.replace(/[^0-9.]/g,""));
-          var isGood = !isNaN(priceFromNum) && !isNaN(priceSpNum) && priceFromNum <= priceSpNum * 1.05;
-          h+="<div style='display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.04);border-radius:6px;padding:8px 10px;'>";
-          h+="<span style='font-size:12px;color:rgba(255,255,255,.4);'>卖家报价</span>";
-          h+="<div style='display:flex;align-items:center;gap:6px;'>";
-          h+="<span style='font-size:14px;font-weight:700;color:#f87171;'>"+xe(priceFrom)+"</span>";
-          h+="<span style='font-size:11px;color:"+(isGood?"#4ade80":"#f87171")+";font-weight:600;'>"+(isGood?"✅ 合理":"⚠️ 偏高")+"</span>";
-          h+="</div></div>";
-        }
         h+="</div>";
       }
-    } else if (dim.sub) {
-      h+="<div style='padding:4px 16px 14px 58px;font-size:15px;color:#9ca3af;'>"+xe(dim.sub)+"</div>";
     }
     h+="</div>";
   });
@@ -671,7 +649,6 @@ function renderAll(d) {
   document.getElementById("fullSub").textContent=d.VERDICT_SUB||"";
   var fullFromEl=document.getElementById("fullFrom");
   if(fullFromEl) fullFromEl.textContent=d.PRICE_FROM||"-";
-  document.getElementById("fullP").textContent=d.SUGGEST_PRICE||"-";
   var fullPriceEl=document.getElementById("fullPrice");
   if(fullPriceEl){
     fullPriceEl.textContent=d.PRICE_LABEL||"-";
@@ -679,50 +656,18 @@ function renderAll(d) {
   }
   document.getElementById("fullDims").innerHTML=fullDims(d);
 
-  var th="";
-  if (d.talks&&d.talks.length>0) {
-    th="<div class='talk-card'><div class='tk-t'>🗣 直接用这"+d.talks.length+"句话谈</div><div class='tk-s'>对着卖家说，不用自己想</div>";
-    d.talks.forEach(function(t){ th+="<div class='tk-item'>"+xe(t)+"</div>"; });
-    th+="</div>";
-  }
-  document.getElementById("fullTalks").innerHTML=th;
-
-  var ah="";
-  if (d.actions&&d.actions.length>0) {
-    ah="<div class='action-card'><div class='ac-t'>谈判路径</div>";
-    d.actions.forEach(function(a,i){
-      var title = (a.title||a.main||"").trim();
-      var note = (a.note||"").trim();
-      if (!title) return;
-      ah+="<div class='ac-item'><div class='ac-num'>"+(i+1)+"</div><div class='ac-body'><div class='ac-main'>"+xe(title)+"</div>";
-      if (note) ah+="<div class='"+(a.type==="danger"?"note-danger":"note-tip")+"'>"+xe(note)+"</div>";
-      ah+="</div></div>";
-    });
-    ah+="</div>";
-  }
-  document.getElementById("fullActions").innerHTML=ah;
-
+  // 放弃条件
   var qh="";
   if (d.quits&&d.quits.length>0) {
-    qh="<div class='quit-card'><div class='qt-t'>以下情况直接放弃</div>";
+    qh="<div class='quit-card' style='margin:0 0 8px;'><div class='qt-t'>以下情况直接放弃</div>";
     d.quits.forEach(function(q){ qh+="<div class='qt-row'>· "+xe(q)+"</div>"; });
     qh+="</div>";
   }
   document.getElementById("fullQuits").innerHTML=qh;
 
-  // 填充放弃页
-  var qv = document.getElementById("quitVerdict");
-  if (qv) {
-    var vt = d.VERDICT||"建议放弃";
-    qv.innerHTML = "❌ " + xe(vt);
-    var qSel=document.getElementById("quitSub");if(qSel)qSel.textContent = d.VERDICT_SUB||"";
-    // Build quit reasons from safety/cost issues
-    var reasons = "";
-    (d.safety_issues||[]).forEach(function(issue){ if(issue.tag==="关键") reasons += "· "+xe(issue.name)+"："+xe(issue.meaning)+"<br>"; });
-    (d.cost_issues||[]).forEach(function(issue){ if(issue.tag==="关键") reasons += "· "+xe(issue.name)+"："+xe(issue.meaning)+"<br>"; });
-    (d.quits||[]).forEach(function(q){ reasons += "· "+xe(q)+"<br>"; });
-    document.getElementById("quitReasons").innerHTML = reasons || "存在重大安全隐患，不建议购买";
-  }
+  // 联系顾问按钮
+  var btnContact = document.getElementById("btnContact");
+  if(btnContact) btnContact.onclick = function(){ alert("请添加微信：ailulu_car，备注"看车""); };
 }
 
 
