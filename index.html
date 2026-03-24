@@ -430,13 +430,15 @@ function parseResult(text) {
     if (!k || !v) return;
     if (/^SAFETY_ISSUE_\d+$/.test(k)) {
       var p=v.split("|");
-      d.safety_issues.push({name:p[0]||"",common:p[1]||"",safety:p[2]||"",cost:p[3]||"",price:p[4]||"",amount:p[5]||""});
+      d.safety_issues.push({name:p[0]||"",common:p[1]||"",impact:p[2]||"",action:p[3]||""});
     } else if (/^COST_ISSUE_\d+$/.test(k)) {
       var p=v.split("|");
-      d.cost_issues.push({name:p[0]||"",common:p[1]||"",safety:p[2]||"",cost:p[3]||"",price:p[4]||"",amount:p[5]||""});
+      d.cost_issues.push({name:p[0]||"",common:p[1]||"",impact:p[2]||"",action:p[3]||""});
     } else if (/^RESALE_ISSUE_\d+$/.test(k)) {
       var p=v.split("|");
-      d.resale_issues.push({name:p[0]||"",common:p[1]||"",safety:p[2]||"",cost:p[3]||"",price:p[4]||"",amount:p[5]||""});
+      d.resale_issues.push({name:p[0]||"",common:p[1]||"",impact:p[2]||"",action:p[3]||""});
+    } else if (/^PLUS_\d+$/.test(k)) {
+      d.plus = d.plus||[]; d.plus.push(v);
     } else if (/^TALK_\d+$/.test(k)) {
       d.talks.push(v);
     } else if (/^ACTION_\d+$/.test(k)) {
@@ -446,7 +448,7 @@ function parseResult(text) {
     } else if (/^DEDUCT_\d+$/.test(k)) {
       var p=v.split("|"); d.deducts.push({label:p[0]||"",amount:p[1]||""});
     } else if (/^PRICE_DEDUCT_\d+$/.test(k)) {
-      var p=v.split("|"); d.price_deducts = d.price_deducts||[]; d.price_deducts.push({name:p[0]||"",amount:p[1]||"",status:p[2]||"covered"});
+      var p=v.split("|"); d.price_deducts = d.price_deducts||[]; d.price_deducts.push({name:p[0]||"",amount:p[1]||"",status:p[2]||"covered",extra:p[3]||""});
     } else if (k==="SAFETY_SUB"||k==="COST_SUB"||k==="RESALE_SUB"||k==="PRICE_SUB") {
       d[k] = v;
     } else {
@@ -532,24 +534,20 @@ function deepDims(d) {
         h+="<div style='padding:10px 14px;'>";
         h+="<div style='font-size:16px;font-weight:600;color:#111;margin-bottom:9px;'>"+xe(issue.name)+"</div>";
         h+="<div style='display:flex;gap:6px;'>";
-        // col1: 常见程度
         var commonColor = (issue.common||"").indexOf("极少见")>=0 ? "#dc2626" :
                           (issue.common||"").indexOf("不常见")>=0 ? "#d97706" :
                           (issue.common||"").indexOf("很常见")>=0 ? "#16a34a" : "#9ca3af";
         h+="<div style='flex:1;text-align:center;padding:7px 4px;background:#f9fafb;border-radius:6px;'>";
         h+="<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>常见程度</div>";
         h+="<div style='font-size:13px;font-weight:600;color:"+commonColor+";'>"+xe(issue.common||"")+"</div></div>";
-        // col2: 影响本维度（定性，不含金额）
-        var col2val = di===0 ? (issue.safety||"") : di===1 ? (issue.cost||"") : (issue.safety||"有影响");
-        // resale维度用safety字段（第3列）做定性描述，cost字段是金额不展示
-        var col2Color = (col2val.indexOf("无")>=0||col2val.indexOf("小")>=0||col2val.indexOf("直接")>=0) ? "#9ca3af" : (col2val.indexOf("大")>=0||col2val.indexOf("高")>=0||col2val.indexOf("隐患")>=0) ? "#dc2626" : "#d97706";
+        var impactVal = issue.impact||"";
+        var impactColor = (impactVal.indexOf("无")>=0||impactVal.indexOf("小")>=0||impactVal.indexOf("直接")>=0) ? "#9ca3af" : (impactVal.indexOf("大")>=0||impactVal.indexOf("高")>=0||impactVal.indexOf("隐患")>=0||impactVal.indexOf("风险")>=0) ? "#dc2626" : "#d97706";
         h+="<div style='flex:1;text-align:center;padding:7px 4px;background:#f9fafb;border-radius:6px;'>";
         h+="<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>"+xe(dim.col2)+"</div>";
-        h+="<div style='font-size:13px;font-weight:600;color:"+col2Color+";'>"+xe(col2val)+"</div></div>";
-        h+="</div>"; // flex
-        h+="</div>"; // padding
+        h+="<div style='font-size:13px;font-weight:600;color:"+impactColor+";'>"+xe(impactVal)+"</div></div>";
+        h+="</div></div>";
       });
-      h+="</div>"; // border box
+      h+="</div>";
     } else if (di === 3) {
       // 19.9价格维度：只引导，不显示任何价格信息
       h+="<div style='padding:4px 16px 12px 58px;'>";
@@ -576,6 +574,15 @@ function fullDims(d) {
     {num:"4",q:"现在买贵了吗",lv:d.PRICE_LEVEL||"warn",lb:d.PRICE_LABEL||"报价偏高",sub:d.PRICE_SUB||"",issues:[],col2:""}
   ];
   var h="";
+  // 优势展示
+  if (d.plus && d.plus.length > 0) {
+    h+="<div style='background:#f0fdf4;border-radius:12px;margin-bottom:7px;padding:14px 16px;border:1px solid #bbf7d0;'>";
+    h+="<div style='font-size:13px;font-weight:700;color:#15803d;margin-bottom:8px;'>✅ 这辆车的亮点</div>";
+    d.plus.forEach(function(p) {
+      h+="<div style='font-size:13px;color:#166534;padding:5px 0;border-bottom:1px solid rgba(34,197,94,.12);line-height:1.5;'>· "+xe(p)+"</div>";
+    });
+    h+="</div>";
+  }
   dims.forEach(function(dim, di) {
     var badgeColor = dim.lv==="ok" ? "color:#16a34a;background:#f0fdf4" :
                      dim.lv==="bad" ? "color:#dc2626;background:#fef2f2" :
@@ -594,25 +601,29 @@ function fullDims(d) {
       dim.issues.forEach(function(issue, ii) {
         if (ii > 0) h+="<div style='height:0.5px;background:#f3f4f6;'></div>";
         h+="<div style='padding:10px 14px;'>";
-        h+="<div style='font-size:16px;font-weight:600;color:#111;margin-bottom:9px;'>"+xe(issue.name)+"</div>";
-        h+="<div style='display:flex;gap:6px;'>";
+        h+="<div style='font-size:14px;font-weight:600;color:#111;margin-bottom:6px;'>"+xe(issue.name)+"</div>";
+        // 常见程度badge
         var commonColor = (issue.common||"").indexOf("极少见")>=0 ? "#dc2626" :
                           (issue.common||"").indexOf("不常见")>=0 ? "#d97706" :
                           (issue.common||"").indexOf("很常见")>=0 ? "#16a34a" : "#9ca3af";
-        h+="<div style='flex:1;text-align:center;padding:7px 4px;background:#f9fafb;border-radius:6px;'>";
-        h+="<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>常见程度</div>";
-        h+="<div style='font-size:13px;font-weight:600;color:"+commonColor+";'>"+xe(issue.common||"")+"</div></div>";
-        var col2val = di===0 ? (issue.safety||"") : (issue.cost||"");
-        var col2Color = (col2val.indexOf("无")>=0||col2val.indexOf("小")>=0||col2val.indexOf("直接")>=0) ? "#9ca3af" : (col2val.indexOf("大")>=0||col2val.indexOf("高")>=0||col2val.indexOf("隐患")>=0) ? "#dc2626" : "#d97706";
-        h+="<div style='flex:1;text-align:center;padding:7px 4px;background:#f9fafb;border-radius:6px;'>";
-        h+="<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>"+xe(dim.col2)+"</div>";
-        h+="<div style='font-size:13px;font-weight:600;color:"+col2Color+";'>"+xe(col2val)+"</div></div>";
-        var amountVal = issue.amount || issue.price || "";
-        var amountColor = (amountVal.indexOf("无")>=0||amountVal.indexOf("0元")>=0) ? "#9ca3af" : "#dc2626";
-        h+="<div style='flex:1;text-align:center;padding:7px 4px;background:#f9fafb;border-radius:6px;'>";
-        h+="<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>额外费用</div>";
-        h+="<div style='font-size:13px;font-weight:600;color:"+amountColor+";'>"+xe(amountVal)+"</div></div>";
-        h+="</div></div>";
+        var commonBg = (issue.common||"").indexOf("极少见")>=0 ? "#fef2f2" :
+                       (issue.common||"").indexOf("不常见")>=0 ? "#fffbeb" :
+                       (issue.common||"").indexOf("很常见")>=0 ? "#f0fdf4" : "#f3f4f6";
+        h+="<span style='font-size:11px;font-weight:600;color:"+commonColor+";background:"+commonBg+";padding:2px 7px;border-radius:4px;margin-bottom:6px;display:inline-block;'>"+xe(issue.common||"")+"</span>";
+        // 影响描述
+        if (issue.impact) {
+          var impactColor = (issue.impact.indexOf("无")>=0||issue.impact.indexOf("小")>=0||issue.impact.indexOf("直接")>=0) ? "#9ca3af" : (issue.impact.indexOf("大")>=0||issue.impact.indexOf("高")>=0||issue.impact.indexOf("隐患")>=0||issue.impact.indexOf("风险")>=0) ? "#dc2626" : "#374151";
+          h+="<div style='font-size:13px;color:"+impactColor+";margin-bottom:4px;'>"+xe(issue.impact)+"</div>";
+        }
+        // 行动建议（199专属）
+        if (issue.action && issue.action.trim()) {
+          var isIgnore = issue.action.indexOf("忽略")>=0||issue.action.indexOf("无需")>=0||issue.action.indexOf("不影响")>=0;
+          var actionBg = isIgnore ? "#f0fdf4" : "#fffbeb";
+          var actionColor = isIgnore ? "#16a34a" : "#92400e";
+          var actionIcon = isIgnore ? "✓" : "→";
+          h+="<div style='font-size:12px;color:"+actionColor+";background:"+actionBg+";padding:5px 8px;border-radius:6px;margin-top:4px;'>"+actionIcon+" "+xe(issue.action)+"</div>";
+        }
+        h+="</div>";
       });
       h+="</div>";
     } else if (di === 3) {
@@ -632,13 +643,13 @@ function fullDims(d) {
         deducts.forEach(function(item) {
           var isCovered = item.status === "covered";
           var statusColor = isCovered ? "#4ade80" : "#f87171";
-          var statusText = isCovered ? "✅ 已覆盖" : "⚠️ 未覆盖";
+          var statusText = item.extra || (isCovered ? "✅ 已覆盖" : "⚠️ 未覆盖");
+          if (!isCovered && item.extra) statusText = "⚠️ " + item.extra;
+          else if (isCovered) statusText = "✅ 已覆盖";
           h+="<div style='display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);'>";
           h+="<span style='font-size:13px;color:rgba(255,255,255,.45);'>"+xe(item.name)+"</span>";
-          h+="<div style='display:flex;align-items:center;gap:8px;'>";
-          h+="<span style='font-size:12px;color:rgba(255,255,255,.3);'>-"+xe(item.amount)+"</span>";
-          h+="<span style='font-size:11px;color:"+statusColor+";font-weight:600;'>"+statusText+"</span>";
-          h+="</div></div>";
+          h+="<span style='font-size:12px;color:"+statusColor+";font-weight:600;'>"+xe(statusText)+"</span>";
+          h+="</div>";
         });
         // 分割线
         h+="<div style='height:1px;background:rgba(251,191,36,.2);margin:10px 0;'></div>";
