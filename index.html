@@ -175,7 +175,7 @@ body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f1f1f1;color
         <div class="pi-unit">万元</div>
       </div>
     </div>
-    <div class="upbox" onclick="document.getElementById('fileInput').click()" style="cursor:pointer;">
+    <div class="upbox" id="upbox" onclick="document.getElementById('fileInput').click()" style="cursor:pointer;">
       <input type="file" id="fileInput" accept="image/*" multiple>
       <div class="ucircle">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -354,6 +354,27 @@ document.getElementById("fileInput").addEventListener("change", function() {
   if (this.files.length > 0) {
     uploadedFiles = Array.from(this.files);
     document.getElementById("uploadSub").textContent = "已选择 " + this.files.length + " 张图片";
+  }
+});
+
+var upbox = document.getElementById("upbox");
+upbox.addEventListener("dragover", function(e) {
+  e.preventDefault();
+  this.style.borderColor = "#2563eb";
+  this.style.background = "#eff6ff";
+});
+upbox.addEventListener("dragleave", function() {
+  this.style.borderColor = "#bfdbfe";
+  this.style.background = "#fff";
+});
+upbox.addEventListener("drop", function(e) {
+  e.preventDefault();
+  this.style.borderColor = "#bfdbfe";
+  this.style.background = "#fff";
+  var files = Array.from(e.dataTransfer.files).filter(function(f){ return f.type.startsWith("image/"); });
+  if (files.length > 0) {
+    uploadedFiles = files;
+    document.getElementById("uploadSub").textContent = "已选择 " + files.length + " 张图片";
   }
 });
 
