@@ -344,6 +344,13 @@ window.onload = function () {
     console.log("选中了文件:", uploadedFiles);
   });
 };
+
+
+window.onload = function () {
+  document.getElementById("upbox").onclick = function () {
+    document.getElementById("fileInput").click();
+  };
+};
   
 function go(id) {
   document.querySelectorAll(".page").forEach(function(p) {
