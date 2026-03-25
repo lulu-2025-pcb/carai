@@ -45,7 +45,7 @@ button {
   background: #fafafa;
 }
 
-.reason {
+.block {
   margin-top: 15px;
   padding: 12px;
   background: #fff;
@@ -79,7 +79,9 @@ button {
 
     <p>建议砍价：<span id="discount"></span></p>
 
-    <div id="reasonBox" class="reason"></div>
+    <div id="reasonBox" class="block"></div>
+
+    <div id="dimensionBox" class="block"></div>
 
   </div>
 
@@ -100,7 +102,6 @@ async function analyze() {
 
     let response;
 
-    // 📸 图片
     if (file) {
       const formData = new FormData();
       formData.append("text", text);
@@ -112,7 +113,6 @@ async function analyze() {
       });
 
     } else {
-      // 📝 文本
       response = await fetch("https://carai.luluzhaos.workers.dev", {
         method: "POST",
         headers: {
@@ -124,7 +124,7 @@ async function analyze() {
 
     const data = await response.json();
 
-    // ===== 显示基础结果 =====
+    // ===== 基础结果 =====
     document.getElementById("resultBox").style.display = "block";
 
     document.getElementById("level").innerText =
@@ -139,40 +139,58 @@ async function analyze() {
     document.getElementById("discount").innerText =
       data.discount.min + " - " + data.discount.max + " 元";
 
-    // ===== 颜色 =====
-    const levelEl = document.getElementById("level");
-    levelEl.className = data.score < 40 ? "red" : "green";
+    document.getElementById("level").className =
+      data.score < 40 ? "red" : "green";
 
-    // ===== 核心：判断依据 =====
+    // ===== 判断依据 =====
     let reasons = [];
 
-    if (data.detail && data.detail.UNKNOWN_RISK) {
-      reasons.push("关键部位未检测（底盘 / 纵梁等）");
+    if (data.detail?.UNKNOWN_RISK) {
+      reasons.push("关键部位未检测（底盘 / 纵梁）");
     }
 
-    if (data.detail && data.detail.STRUCT_RISK) {
-      reasons.push("存在结构件 / 内骨相关维修");
+    if (data.detail?.STRUCT_RISK) {
+      reasons.push("存在结构件或内骨维修");
     }
 
-    if (data.detail && data.detail.ACCIDENT_COUNT > 5) {
-      reasons.push("维修记录较多，不像单次事故");
-    } else if (data.detail && data.detail.ACCIDENT_COUNT > 0) {
-      reasons.push("存在维修或更换记录");
+    if (data.detail?.ACCIDENT_COUNT > 3) {
+      reasons.push("多次维修记录");
     }
 
-    if (data.detail && data.detail.TOTAL_COST > 50000) {
-      reasons.push("历史维修金额较高");
-    } else if (data.detail && data.detail.TOTAL_COST > 20000) {
-      reasons.push("历史维修金额偏高");
+    if (data.detail?.TOTAL_COST > 50000) {
+      reasons.push("维修金额较高");
     }
 
     if (reasons.length === 0) {
-      reasons.push("未发现明显结构或事故风险");
+      reasons.push("未发现明显风险");
     }
 
     document.getElementById("reasonBox").innerHTML =
       "<b>🔍 判断依据</b><br>" +
       reasons.map(x => "• " + x).join("<br>");
+
+    // ===== 六大维度（核心新增） =====
+    let d = data.detail || {};
+
+    let accident = d.ACCIDENT_COUNT > 0 ? "存在维修/事故记录" : "未发现事故记录";
+    let structure = d.STRUCT_RISK ? "存在结构风险" : "结构正常";
+    let exterior = d.TOTAL_COST > 20000 ? "存在外观/钣金维修" : "外观正常";
+    let usage = "使用正常（根据里程/年限判断）";
+    let cost = d.TOTAL_COST > 20000 ? "后续维护成本可能偏高" : "维护成本正常";
+
+    document.getElementById("dimensionBox").innerHTML = `
+      <b>📊 车况拆解</b><br><br>
+
+      <b>事故情况</b><br>${accident}<br><br>
+
+      <b>结构风险</b><br>${structure}<br><br>
+
+      <b>外观情况</b><br>${exterior}<br><br>
+
+      <b>使用情况</b><br>${usage}<br><br>
+
+      <b>维修成本</b><br>${cost}
+    `;
 
   } catch (e) {
     alert("出错：" + e.message);
