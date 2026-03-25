@@ -102,14 +102,14 @@ async function analyze() {
       formData.append("text", text);
       formData.append("file", file);
 
-      response = await fetch("你的worker地址", {
+      response = await fetch("https://carai.luluzhaos.workers.dev", {
         method: "POST",
         body: formData
       });
 
     } else {
       // 📝 文本
-      response = await fetch("你的worker地址", {
+      response = await fetch("https://carai.luluzhaos.workers.dev", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
