@@ -327,6 +327,24 @@ var API = "https://carai.luluzhaos.workers.dev";
 var uploadedFiles = [];
 var RES = {};
 
+window.onload = function () {
+  var input = document.getElementById("fileInput");
+
+  console.log("fileInput元素:", input);
+
+  if (!input) {
+    console.error("找不到 fileInput！");
+    return;
+  }
+
+  input.addEventListener("change", function () {
+    console.log("触发了 change 事件");
+
+    uploadedFiles = Array.from(this.files);
+    console.log("选中了文件:", uploadedFiles);
+  });
+};
+  
 function go(id) {
   document.querySelectorAll(".page").forEach(function(p) {
     p.classList.remove("active");
