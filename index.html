@@ -1,915 +1,125 @@
 <!DOCTYPE html>
-<!-- v202603230936 -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>验车AI · 买车决策助手</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>验车AI</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:-apple-system,"PingFang SC",sans-serif;background:#f1f1f1;color:#111;}
-.page{display:none;min-height:100vh;}
-.page.active{display:block;}
-/* HERO */
-.hero{background:#0d1117;padding:52px 20px 24px;position:relative;overflow:hidden;}
-.hero::before{content:"";position:absolute;top:-70px;right:-50px;width:220px;height:220px;background:radial-gradient(circle,rgba(239,68,68,.22)0%,transparent 65%);border-radius:50%;}
-.h1{font-size:24px;font-weight:900;color:#fff;line-height:1.28;margin-bottom:8px;position:relative;z-index:1;}
-.h1sub{font-size:18px;color:rgba(255,255,255,.55);line-height:1.6;margin-bottom:16px;position:relative;z-index:1;}
-.proof{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.28);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;position:relative;z-index:1;}
-.proof-num{font-size:18px;font-weight:900;color:#f87171;white-space:nowrap;}
-.proof-t{font-size:13px;color:rgba(255,150,150,.6);line-height:1.4;white-space:nowrap;}
-/* BODY */
-.body1{padding:14px 14px 100px;}
-.price-input{background:#fff;border-radius:14px;padding:13px 16px;margin-bottom:12px;}
-.pi-label{font-size:19px;color:#9ca3af;margin-bottom:7px;}
-.pi-row{display:flex;align-items:center;gap:10px;}
-.pi-field{flex:1;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;font-size:18px;font-weight:700;color:#111;outline:none;}
-.pi-field::placeholder{color:#d1d5db;font-weight:400;font-size:18px;}
-.pi-unit{font-size:18px;font-weight:700;color:#374151;}
-.upbox{background:#fff;border-radius:18px;border:2px dashed #bfdbfe;padding:20px 14px;text-align:center;margin-bottom:10px;position:relative;overflow:hidden;}
-.ucircle{width:48px;height:48px;background:#eff6ff;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;}
-.ut{font-size:18px;font-weight:800;color:#111;margin-bottom:3px;}
-.us{font-size:19px;color:#9ca3af;margin-bottom:9px;}
-.ftags{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;}
-.ftag{background:#eff6ff;color:#1d4ed8;font-size:9px;font-weight:700;padding:3px 8px;border-radius:20px;}
-#fileInput{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;}
-.orline{display:flex;align-items:center;gap:8px;color:#9ca3af;font-size:19px;margin:9px 0;}
-.orline::before,.orline::after{content:"";flex:1;height:1px;background:#e5e7eb;}
-.pastebox{background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:12px;}
-#pasteText{width:100%;border:none;outline:none;resize:none;height:80px;font-size:19px;color:#374151;line-height:1.65;font-family:inherit;background:transparent;display:block;}
-#pasteText::placeholder{color:#d1d5db;}
-.dims-preview{background:#fff;border-radius:14px;padding:14px;margin-bottom:16px;}
-.dp-label{font-size:19px;color:#9ca3af;margin-bottom:10px;}
-.dp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.dp-item{background:#f9fafb;border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:8px;}
-.dp-ico{font-size:19px;}.dp-t{font-size:18px;font-weight:700;color:#374151;}.dp-s{font-size:18px;color:#9ca3af;margin-top:1px;}
-.ctabar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #f3f4f6;padding:12px 14px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:50;}
-.btn-go{display:block;width:100%;background:#111827;color:#fff;border:none;border-radius:16px;padding:16px;font-size:19px;font-weight:900;cursor:pointer;font-family:inherit;}
-.btn-note{text-align:center;font-size:18px;color:#9ca3af;margin-top:7px;}
-.btn-note b{color:#16a34a;}
-/* ANALYZING */
-#p1{background:#fff;}
-.az-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:0 28px;text-align:center;}
-.orbit{position:relative;width:86px;height:86px;margin:0 auto 26px;}
-.r1{position:absolute;inset:0;border:3px solid #e5e7eb;border-top-color:#dc2626;border-right-color:#f87171;border-radius:50%;animation:spin .85s linear infinite;}
-.r2{position:absolute;inset:13px;border:2px solid #f3f4f6;border-bottom-color:#ef4444;border-radius:50%;animation:spin .6s linear infinite reverse;}
-.rc{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;background:#fff5f5;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;}
-@keyframes spin{to{transform:rotate(360deg)}}
-.azh{font-size:20px;font-weight:800;color:#111;margin-bottom:6px;}
-.azs{font-size:19px;color:#6b7280;margin-bottom:28px;}
-.steps{width:100%;max-width:280px;}
-.si{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:11px;margin-bottom:5px;font-size:19px;background:#f9fafb;color:#9ca3af;text-align:left;transition:all .3s;}
-.si.doing{background:#fff5f5;color:#dc2626;}.si.done{background:#f0fdf4;color:#15803d;}
-.sd{width:8px;height:8px;border-radius:50%;background:#e5e7eb;flex-shrink:0;}
-.si.doing .sd{background:#ef4444;animation:pulse .8s infinite;}.si.done .sd{background:#22c55e;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.ptrack{width:100%;max-width:280px;height:3px;background:#f3f4f6;border-radius:2px;margin:20px 0 0;overflow:hidden;}
-.pfill{height:100%;background:linear-gradient(90deg,#dc2626,#ef4444);border-radius:2px;width:0%;transition:width .5s;}
-/* SHARED RESULT */
-.blk1{background:#0d1117;padding:46px 20px 22px;}
-.b1-eye{font-size:18px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,.3);margin-bottom:10px;}
-.b1-verdict{font-size:24px;font-weight:900;line-height:1.2;margin-bottom:6px;}
-.b1-sub{font-size:19px;color:rgba(255,255,255,.5);margin-bottom:14px;line-height:1.5;}
-.b1-rows{display:flex;flex-direction:column;gap:7px;}
-.b1-row{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.05);border-radius:10px;padding:11px 14px;}
-.b1-label{font-size:18px;color:rgba(255,255,255,.5);}.b1-val{font-size:19px;font-weight:800;}
-.v-green{color:#4ade80;}.v-amber{color:#fbbf24;}.v-red{color:#f87171;}.v-blur{color:rgba(255,255,255,.15);letter-spacing:2px;font-size:18px;}
-.blk2{padding:8px 10px 0;}
-.dim-card{background:#fff;border-radius:12px;margin-bottom:6px;overflow:hidden;}
-.dim-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 8px;}
-.dim-left{display:flex;align-items:center;gap:9px;}
-.dim-ico{font-size:18px;}.dim-name{font-size:19px;font-weight:700;color:#111;}
-.dim-badge{font-size:18px;font-weight:800;}
-.badge-ok{color:#16a34a;}.badge-warn{color:#d97706;}.badge-bad{color:#dc2626;}
-.dim-issues{padding:0 14px 12px;}
-.issue-row{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid #f3f4f6;}
-.issue-row:last-child{border-bottom:none;padding-bottom:0;}
-.issue-tag{font-size:18px;font-weight:700;padding:2px 6px;border-radius:4px;flex-shrink:0;margin-top:1px;}
-.tag-red{background:#fef2f2;color:#dc2626;}.tag-amber{background:#fffbeb;color:#d97706;}.tag-green{background:#f0fdf4;color:#16a34a;}
-.issue-body{flex:1;}.issue-text{font-size:18px;color:#374151;font-weight:600;line-height:1.4;}
-.issue-meaning{font-size:19px;color:#6b7280;margin-top:2px;line-height:1.4;}
-.issue-impact{font-size:19px;color:#d97706;margin-top:2px;font-weight:600;}
-.dim-paywall{border-top:1px dashed #e5e7eb;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;background:#fafafa;}
-.dp-text2{font-size:19px;color:#9ca3af;}
-.dp-btn{background:linear-gradient(135deg,#d97706,#b45309);color:#fff;border-radius:20px;padding:5px 12px;font-size:18px;font-weight:700;cursor:pointer;border:none;font-family:inherit;}
-.dim-amounts{display:flex;gap:6px;padding:0 14px 12px;}
-.da-item{flex:1;border-radius:8px;padding:8px 10px;text-align:center;}
-.da-cost{background:#fef2f2;}.da-save{background:#f0fdf4;}.da-neutral{background:#f9fafb;}
-.da-label{font-size:19px;color:#9ca3af;margin-bottom:3px;}.da-val{font-size:18px;font-weight:800;}
-.da-red{color:#dc2626;}.da-green{color:#16a34a;}.da-gray{color:#9ca3af;font-weight:600;font-size:19px;}
-.dmf-item{flex:1;background:#f9fafb;border-radius:8px;padding:5px 8px;text-align:center;}
-.dmf-label{font-size:19px;color:#9ca3af;margin-bottom:3px;}
-.dmf-val{font-size:19px;font-weight:800;color:#e0e0e0;letter-spacing:1px;}
-.cant-do{background:#0d1117;margin:0 12px 10px;border-radius:14px;padding:14px 16px;border:1px solid rgba(239,68,68,.2);}
-.cd-t{font-size:18px;color:#fca5a5;font-weight:700;margin-bottom:6px;}
-.cd-b{font-size:19px;color:rgba(255,255,255,.7);line-height:1.6;}.cd-b b{color:#fff;}
-.price-hero{background:#0d1117;margin:10px 12px 0;border-radius:16px;padding:18px;border:1.5px solid rgba(251,191,36,.35);}
-.ph-label{font-size:19px;color:rgba(251,191,36,.6);font-weight:700;margin-bottom:6px;}
-.ph-price{font-size:34px;font-weight:900;color:#fbbf24;line-height:1;margin-bottom:4px;}
-.ph-range{font-size:18px;color:rgba(255,255,255,.4);margin-bottom:12px;}
-.ph-divider{height:1px;background:rgba(255,255,255,.08);margin-bottom:12px;}
-.ph-breakdown{display:flex;flex-direction:column;gap:6px;}
-.ph-row{display:flex;justify-content:space-between;font-size:18px;}
-.ph-item{color:rgba(255,255,255,.5);}
-.ph-red{font-weight:700;color:#f87171;}.ph-amber{font-weight:700;color:#fbbf24;}
-.talk-card{background:#0d1117;margin:10px 12px 8px;border-radius:14px;padding:16px;border:1.5px solid rgba(251,191,36,.25);}
-.tk-t{font-size:19px;font-weight:800;color:#fcd34d;margin-bottom:3px;}
-.tk-s{font-size:19px;color:rgba(255,255,255,.35);margin-bottom:12px;}
-.tk-item{background:rgba(255,255,255,.05);border-left:2px solid rgba(251,191,36,.5);border-radius:0 8px 8px 0;padding:10px 12px;margin-bottom:8px;font-size:18px;color:rgba(255,255,255,.85);line-height:1.7;}
-.tk-item:last-child{margin-bottom:0;}
-.action-card{background:#111827;margin:0 12px 8px;border-radius:14px;padding:16px;}
-.ac-t{font-size:19px;font-weight:900;color:#fff;margin-bottom:12px;}
-.ac-item{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.07);}
-.ac-item:last-child{border-bottom:none;padding-bottom:0;}
-.ac-num{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.1);font-size:19px;font-weight:700;color:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
-.ac-body{flex:1;}.ac-main{font-size:18px;color:#fff;font-weight:600;line-height:1.4;}
-.note-danger{font-size:18px;margin-top:2px;color:#f87171;}.note-tip{font-size:18px;margin-top:2px;color:#fbbf24;}
-.quit-card{background:#fef2f2;margin:0 12px 8px;border-radius:12px;padding:12px 14px;}
-.qt-t{font-size:19px;font-weight:700;color:#b91c1c;margin-bottom:6px;}
-.qt-row{font-size:19px;color:#991b1b;line-height:1.7;}
-.cta-fixed{position:sticky;bottom:0;background:linear-gradient(to top,#f1f1f1 60%,transparent);padding:10px 12px 16px;}
-.btn-amber{background:linear-gradient(135deg,#d97706,#b45309);color:#fff;border-radius:14px;padding:15px;font-size:18px;font-weight:900;margin-bottom:7px;cursor:pointer;border:none;width:100%;font-family:inherit;}
-.btn-ghost{background:#fff;border:1.5px solid #e5e7eb;color:#6b7280;border-radius:12px;padding:12px;font-size:18px;font-weight:600;cursor:pointer;width:100%;font-family:inherit;display:block;}
-.pay-top{background:#0d1117;padding:54px 20px 24px;text-align:center;}
-.pay-tier{display:inline-block;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.3);border-radius:6px;padding:4px 12px;font-size:19px;color:#fcd34d;margin-bottom:12px;}
-.pay-title{font-size:22px;font-weight:900;color:#fff;margin-bottom:6px;}
-.pay-desc{font-size:19px;color:rgba(255,255,255,.5);margin-bottom:16px;line-height:1.6;}
-.pay-price-big{font-size:40px;font-weight:900;color:#fff;line-height:1;}
-.pay-price-big span{font-size:18px;}
-.pay-ori{font-size:18px;color:rgba(255,255,255,.3);margin-top:4px;}
-.pay-body{padding:16px 14px 130px;}
-.pay-card{background:#fff;border-radius:16px;padding:16px;margin-bottom:10px;}
-.pay-card-t{font-size:19px;font-weight:700;color:#111;margin-bottom:12px;}
-.pay-item{padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:19px;color:#374151;}
-.pay-item:last-child{border-bottom:none;padding-bottom:0;}
-.qr-card{background:#fff;border-radius:16px;padding:18px;margin-bottom:10px;text-align:center;}
-.qr-t{font-size:18px;font-weight:700;color:#111;margin-bottom:4px;}
-.qr-s{font-size:18px;color:#9ca3af;margin-bottom:14px;}
-.qr-box{width:150px;height:150px;margin:0 auto;border:1.5px solid #e5e7eb;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f9fafb;font-size:18px;color:#9ca3af;text-align:center;line-height:1.8;}
-.pay-cta{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #f3f4f6;padding:12px 14px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;z-index:50;}
-.pay-back{flex:1;background:#fff;color:#374151;border:1.5px solid #e5e7eb;border-radius:14px;padding:14px 8px;font-size:18px;font-weight:700;cursor:pointer;font-family:inherit;}
-.pay-ok{flex:2;background:#111827;color:#fff;border:none;border-radius:14px;padding:14px 8px;font-size:18px;font-weight:900;cursor:pointer;font-family:inherit;}
-.btn-row{display:flex;gap:8px;}
-.btn-sm-g{flex:1;background:#fff;color:#111;border:1.5px solid #e5e7eb;border-radius:12px;padding:13px 8px;font-size:18px;font-weight:700;cursor:pointer;font-family:inherit;}
-.btn-sm-s{flex:1.8;background:#111827;color:#fff;border:none;border-radius:12px;padding:13px 8px;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit;}
-.pb100{padding-bottom:100px;}
+body{font-family:-apple-system,"PingFang SC";background:#f5f5f5;margin:0;padding:20px;}
+.card{background:#fff;padding:16px;border-radius:12px;margin-bottom:12px;}
+.btn{background:#111;color:#fff;padding:14px;border:none;border-radius:10px;width:100%;font-size:16px;}
+h2{margin:10px 0;}
 </style>
 </head>
 <body>
 
-<!-- 上传页 -->
-<div class="page active" id="p0">
-  <div class="hero">
-    <div class="h1">这车值不值买</div>
-    <div class="h1sub">AI看懂车况 | 判断报价 | 给出谈价方案</div>
-    <div class="proof">
-      <div class="proof-num">5000-12000元</div>
-      <div class="proof-t">已帮用户平均避免的损失金额</div>
-    </div>
-  </div>
-  <div class="body1">
-    <div class="price-input">
-      <div class="pi-label">现车报价（必填，用于判断是否偏高）</div>
-      <div class="pi-row">
-        <input type="number" id="priceInput" class="pi-field" placeholder="例：16.5" step="0.1">
-        <div class="pi-unit">万元</div>
-      </div>
-    </div>
-    <div class="upbox" id="upbox" onclick="document.getElementById('fileInput').click()" style="cursor:pointer;">
-      <input type="file" id="fileInput" accept="image/*" multiple>
-      <div class="ucircle">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="17 8 12 3 7 8"/>
-          <line x1="12" y1="3" x2="12" y2="15"/>
-        </svg>
-      </div>
-      <div class="ut">上传验车报告</div>
-      <div class="us" id="uploadSub">图片 · 截图 · 拍照均可</div>
-      <div class="ftags">
-        <span class="ftag">查博士</span><span class="ftag">瓜子</span><span class="ftag">大搜车</span><span class="ftag">其他</span>
-      </div>
-    </div>
-    <div class="orline">或直接粘贴文字内容</div>
-    <div class="pastebox">
-      <textarea id="pasteText" placeholder="粘贴报告文字...&#10;例：奔驰C级 非事故车 里程20022km"></textarea>
-    </div>
-    <div class="dims-preview">
-      <div class="dp-label">上传后 AI 分析这四个维度：</div>
-      <div class="dp-grid">
-        <div class="dp-item"><div class="dp-t">1 能不能放心开</div></div>
-        <div class="dp-item"><div class="dp-t">2 以后会不会多花钱</div></div>
-        <div class="dp-item"><div class="dp-t">3 以后卖会不会亏</div></div>
-        <div class="dp-item"><div class="dp-t">4 现在买贵了吗</div></div>
-      </div>
-    </div>
-  </div>
-  <div class="ctabar">
-    <button class="btn-go" id="analyzeBtn">免费看结果 →</button>
-    <div class="btn-note">3分钟出结论 · 首次<b>免费</b> · 无需注册</div>
-  </div>
-</div>
+<h2>🚗 验车AI决策</h2>
 
+<textarea id="input" placeholder="粘贴检测报告" style="width:100%;height:100px;"></textarea>
+<br><br>
+<button class="btn" onclick="run()">开始分析</button>
 
-<!-- 建议放弃页 -->
-<div class="page" id="p2quit">
-  <div class="blk1">
-    <div class="b1-eye">AI 购车判断 · 免费版</div>
-    <div class="b1-verdict v-red" id="quitVerdict">❌ 建议放弃</div>
-    <div class="b1-sub" id="quitSub" style="color:rgba(255,100,100,.8);"></div>
-  </div>
-  <div style="padding:16px 14px;">
-    <div style="background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;">
-      <div style="font-size:19px;font-weight:800;color:#dc2626;margin-bottom:10px;">⚠️ 为什么不建议买</div>
-      <div id="quitReasons" style="font-size:18px;color:#374151;line-height:1.8;"></div>
-    </div>
-    <div style="background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;">
-      <div style="font-size:19px;font-weight:800;color:#111;margin-bottom:10px;">🔍 如果你还想确认</div>
-      <div style="font-size:18px;color:#374151;line-height:1.8;">
-        · 要求卖家提供完整维修记录<br>
-        · 约第三方检测机构做结构件专项检测<br>
-        · 纵梁/车架有焊接痕迹则立即放弃<br>
-        · 泡水/火烧车无论价格多低都不要买
-      </div>
-    </div>
-    <div style="background:#fef2f2;border-radius:14px;padding:16px;margin-bottom:20px;border:1px solid rgba(220,38,38,.2);">
-      <div style="font-size:18px;color:#dc2626;line-height:1.8;">这类车即使买到手，<b>后期维修费用、保值损失、二次转卖困难</b>叠加，实际损失远超表面便宜的价格。</div>
-    </div>
-    <button class="btn-amber" style="margin-bottom:10px;" onclick="">联系顾问帮你找更好的车 →</button>
-    <button class="btn-ghost" data-go="p0">← 重新上传其他报告</button>
-  </div>
-</div>
+<div id="result" style="display:none;margin-top:20px;">
 
-<!-- 分析中 -->
-<div class="page" id="p1">
-  <div class="az-inner">
-    <div class="orbit"><div class="r1"></div><div class="r2"></div><div class="rc">🔍</div></div>
-    <div class="azh">AI正在分析报告</div>
-    <div class="azs">约30-40秒出结果…</div>
-    <div class="steps">
-      <div class="si" id="st1"><div class="sd"></div><span>解析报告识别车辆信息</span></div>
-      <div class="si" id="st2"><div class="sd"></div><span>评估四大维度风险</span></div>
-      <div class="si" id="st3"><div class="sd"></div><span>对比市场价格区间</span></div>
-      <div class="si" id="st4"><div class="sd"></div><span>生成购车决策方案</span></div>
-    </div>
-    <div class="ptrack"><div class="pfill" id="pf"></div></div>
-  </div>
-</div>
-
-<!-- 免费结果 -->
-<div class="page" id="p2">
-  <div style="background:#0d1117;padding:40px 16px 16px;">
-    <div style="font-size:12px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,.3);margin-bottom:8px;">AI 购车判断 · 免费版</div>
-    <div style="font-size:15px;font-weight:600;color:rgba(248,113,113,0.9);margin-bottom:16px;" id="fHook">AI已完成车况分析</div>
-    <div id="fDims"></div>
-  </div>
-  <div class="cta-fixed">
-    <button class="btn-amber" data-go="p4f">解锁完整分析 ¥99 →</button>
-    <button class="btn-ghost" data-go="p0">← 重新上传</button>
-  </div>
-</div>
-
-<!-- 付款199 -->
-<div class="page" id="p4f">
-  <div class="pay-top">
-    <div class="pay-tier">完整决策版 · ¥99</div>
-    <div class="pay-title">看懂这辆车，谈下这单</div>
-    <div class="pay-desc">车况分析 · 价格是否合理 · 谈判话术</div>
-    <div class="pay-price-big"><span>¥</span>99</div>
-    <div class="pay-ori">预计帮你省 5000-15000 元</div>
-  </div>
-  <div class="pay-body">
-    <div class="pay-card">
-      <div class="pay-card-t">解锁后你能看到：</div>
-      <div class="pay-item">✓ 每个问题具体是什么，严不严重</div>
-      <div class="pay-item">✓ 车辆真实亮点，好在哪里</div>
-      <div class="pay-item">✓ 报价有没有覆盖车况折损</div>
-      <div class="pay-item">✓ <b>3句谈判话术</b>（直接对着卖家念）</div>
-      <div class="pay-item">✓ <b>谈判路径</b>（4步走完这单）</div>
-      <div class="pay-item">✓ <b>放弃条件</b>（什么时候该走人）</div>
-    </div>
-    <div class="qr-card">
-      <div class="qr-t">扫码支付宝付款</div>
-      <div class="qr-s">付款后点我已付款解锁</div>
-      <img src="qr.jpg" style="width:150px;height:150px;border-radius:10px;display:block;margin:0 auto 14px;">
-    </div>
-  </div>
-  <div class="pay-cta">
-    <button class="pay-back" data-go="p2">← 返回</button>
-    <button class="pay-ok" data-go="p4">我已付款，解锁 →</button>
-  </div>
-</div>
-
-<!-- 99结果 -->
-<div class="page" id="p4">
-  <div style="background:#0d1117;padding:40px 16px 16px;">
-    <div style="font-size:12px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,.3);margin-bottom:8px;">AI 完整决策方案 · ¥99 已解锁</div>
-    <div class="b1-sub" id="fullSub" style="font-size:14px;color:rgba(255,255,255,.5);margin-bottom:12px;"></div>
-    <div class="b1-rows">
-      <div class="b1-row"><span class="b1-label">卖家报价</span><span class="b1-val v-red" id="fullFrom">-</span></div>
-      <div class="b1-row"><span class="b1-label">价格判断</span><span class="b1-val" id="fullPrice">-</span></div>
-    </div>
+  <div class="card">
+    <h2 id="decision"></h2>
   </div>
 
-  <div style="padding:8px 10px 0;" id="fullDims"></div>
-  <div id="fullQuits"></div>
-  <div class="pb100"></div>
-  <div class="cta-fixed">
-    <div class="btn-row">
-      <button class="btn-sm-g" data-go="p0">← 重新分析</button>
-      <button class="btn-sm-s" id="btnContact">联系顾问跟进 →</button>
-    </div>
+  <div class="card">
+    <b>发生过什么事故</b>
+    <p id="accident"></p>
   </div>
+
+  <div class="card">
+    <b>事故等级</b>
+    <p id="level"></p>
+  </div>
+
+  <div class="card">
+    <b>后面可能问题</b>
+    <p id="risk"></p>
+  </div>
+
+  <div class="card">
+    <b>应该少多少钱</b>
+    <p id="money"></p>
+  </div>
+
+  <div class="card">
+    <b>现在价格判断</b>
+    <p id="price"></p>
+  </div>
+
 </div>
 
 <script>
-// ★ 把这里改成你的 Worker 地址
-var API = "https://carai.luluzhaos.workers.dev";
 
-var uploadedFiles = [];
-var RES = {};
+const API = "https://carai.luluzhaos.workers.dev";
 
-function toggleDim(id) {
-  var el = document.getElementById(id);
-  var arrow = document.getElementById(id+"_arrow");
-  if (!el) return;
-  var isOpen = el.style.display !== "none";
-  el.style.display = isOpen ? "none" : "block";
-  if (arrow) arrow.textContent = isOpen ? "▶" : "▼";
-}
+async function run() {
 
-function go(id) {
-  document.querySelectorAll(".page").forEach(function(p) { p.classList.remove("active"); });
-  document.getElementById(id).classList.add("active");
-  window.scrollTo(0, 0);
-}
+  const text = document.getElementById("input").value;
 
-document.addEventListener("click", function(e) {
-  var el = e.target.closest("[data-go]");
-  if (el) go(el.getAttribute("data-go"));
-});
-
-document.getElementById("analyzeBtn").addEventListener("click", startAnalyze);
-document.getElementById("fileInput").addEventListener("change", function() {
-  if (this.files.length > 0) {
-    uploadedFiles = Array.from(this.files);
-    document.getElementById("uploadSub").textContent = "已选择 " + this.files.length + " 张图片";
-  }
-});
-
-var upbox = document.getElementById("upbox");
-upbox.addEventListener("dragover", function(e) {
-  e.preventDefault();
-  this.style.borderColor = "#2563eb";
-  this.style.background = "#eff6ff";
-});
-upbox.addEventListener("dragleave", function() {
-  this.style.borderColor = "#bfdbfe";
-  this.style.background = "#fff";
-});
-upbox.addEventListener("drop", function(e) {
-  e.preventDefault();
-  this.style.borderColor = "#bfdbfe";
-  this.style.background = "#fff";
-  var files = Array.from(e.dataTransfer.files).filter(function(f){ return f.type.startsWith("image/"); });
-  if (files.length > 0) {
-    uploadedFiles = files;
-    document.getElementById("uploadSub").textContent = "已选择 " + files.length + " 张图片";
-  }
-});
-
-function animateSteps() {
-  ["st1","st2","st3","st4"].forEach(function(id) { document.getElementById(id).className = "si"; });
-  document.getElementById("pf").style.width = "0%";
-  var on = [400,2500,6000,10000];
-  var dn = [2300,5700,9700,14000];
-  ["st1","st2","st3","st4"].forEach(function(id, i) {
-    setTimeout(function() { document.getElementById(id).className = "si doing"; document.getElementById("pf").style.width = ((i+1)*18)+"%"; }, on[i]);
-    setTimeout(function() { document.getElementById(id).className = "si done"; document.getElementById("pf").style.width = ((i+1)*24)+"%"; }, dn[i]);
-  });
-}
-
-function parseResult(text) {
-  var d = {
-    safety_issues:[], cost_issues:[], resale_issues:[],
-    talks:[], actions:[], quits:[], deducts:[]
-  };
-  text.split("\n").forEach(function(line) {
-    var ci = line.indexOf(":");
-    if (ci < 0) return;
-    var k = line.substring(0, ci).trim();
-    var v = line.substring(ci+1).trim();
-    if (!k || !v) return;
-    if (/^SAFETY_ISSUE_\d+$/.test(k)) {
-      var p=v.split("|");
-      d.safety_issues.push({name:p[0]||"",common:p[1]||"",impact:p[2]||"",action:p[3]||"",covered:p[4]||""});
-    } else if (/^COST_ISSUE_\d+$/.test(k)) {
-      var p=v.split("|");
-      d.cost_issues.push({name:p[0]||"",common:p[1]||"",impact:p[2]||"",action:p[3]||"",covered:p[4]||""});
-    } else if (/^RESALE_ISSUE_\d+$/.test(k)) {
-      var p=v.split("|");
-      d.resale_issues.push({name:p[0]||"",common:p[1]||"",impact:p[2]||"",action:p[3]||"",covered:p[4]||""});
-    } else if (/^PLUS_\d+$/.test(k)) {
-      d.plus = d.plus||[]; d.plus.push(v);
-    } else if (/^TALK_\d+$/.test(k)) {
-      d.talks.push(v);
-    } else if (/^ACTION_\d+$/.test(k)) {
-      var p=v.split("|"); d.actions.push({title:p[0]||"",note:p[1]||"",type:p[2]||"tip"});
-    } else if (/^QUIT_\d+$/.test(k)) {
-      d.quits.push(v);
-    } else if (/^DEDUCT_\d+$/.test(k)) {
-      var p=v.split("|"); d.deducts.push({label:p[0]||"",amount:p[1]||""});
-    } else if (/^PRICE_DEDUCT_\d+$/.test(k)) {
-      var p=v.split("|"); d.price_deducts = d.price_deducts||[]; d.price_deducts.push({name:p[0]||"",status:(p[1]||"").replace(/-/g,"").trim(),extra:p[2]||""});
-    } else if (k==="SAFETY_SUB"||k==="COST_SUB"||k==="RESALE_SUB"||k==="PRICE_SUB") {
-      d[k] = v;
-    } else {
-      d[k] = v;
-    }
-  });
-  return d;
-}
-
-
-function xe(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-function vc(c, verdict) {
-  if (c==="green") return "v-green";
-  if (c==="red") return "v-red";
-  if (verdict && verdict.indexOf("谨慎") >= 0) return "v-red";
-  return "v-amber";
-}
-function vi(c) { return c==="green"?"✅":c==="red"?"❌":"🟡"; }
-
-function freeDims(d) {
-  var dims=[
-    {num:"1",q:"能不能放心开",lv:d.SAFETY_LEVEL||"warn",lb:d.SAFETY_LABEL||"需关注",sub:d.SAFETY_SUB||""},
-    {num:"2",q:"以后会不会多花钱",lv:d.COST_LEVEL||"warn",lb:d.COST_LABEL||"需注意",sub:d.COST_SUB||""},
-    {num:"3",q:"以后卖会不会亏",lv:d.RESALE_LEVEL||"warn",lb:d.RESALE_LABEL||"有风险",sub:d.RESALE_SUB||""},
-  ];
-  var h="";
-  dims.forEach(function(dim, di) {
-    var badgeColor = dim.lv==="ok" ? "#4ade80" : dim.lv==="bad" ? "#f87171" : "#fbbf24";
-    var uid = "fdim_"+di;
-    h+="<div style='border-bottom:1px solid rgba(255,255,255,.07);'>";
-    h+="<div onclick='toggleDim(\""+uid+"\")' style='display:flex;align-items:center;justify-content:space-between;padding:14px 0;cursor:pointer;'>";
-    h+="<div style='display:flex;align-items:center;gap:10px;'>";
-    h+="<span style='font-size:13px;color:rgba(255,255,255,.3);font-weight:700;'>"+dim.num+"</span>";
-    h+="<span style='font-size:16px;font-weight:700;color:#fff;'>"+xe(dim.q)+"</span>";
-    h+="</div>";
-    h+="<div style='display:flex;align-items:center;gap:8px;'>";
-    h+="<span style='font-size:12px;font-weight:700;color:"+badgeColor+";'>"+xe(dim.lb)+"</span>";
-    h+="<span style='font-size:12px;color:rgba(255,255,255,.25);' id='"+uid+"_arrow'>▶</span>";
-    h+="</div></div>";
-    // 展开内容
-    h+="<div id='"+uid+"' style='display:none;padding-bottom:12px;'>";
-    if (dim.sub) h+="<div style='font-size:13px;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:8px;'>"+xe(dim.sub)+"</div>";
-    h+="<div style='font-size:12px;color:rgba(255,255,255,.25);'>解锁查看每个具体问题 →</div>";
-    h+="</div>";
-    h+="</div>";
-  });
-  // 第4维度锁定
-  h+="<div style='border-bottom:1px solid rgba(255,255,255,.07);'>";
-  h+="<div style='display:flex;align-items:center;justify-content:space-between;padding:14px 0;'>";
-  h+="<div style='display:flex;align-items:center;gap:10px;'>";
-  h+="<span style='font-size:13px;color:rgba(255,255,255,.3);font-weight:700;'>4</span>";
-  h+="<span style='font-size:16px;font-weight:700;color:#fff;'>现在买贵了吗</span>";
-  h+="</div>";
-  h+="<span style='font-size:12px;color:rgba(255,255,255,.3);'>🔒 解锁</span>";
-  h+="</div></div>";
-  return h;
-}
-
-
-function deepDims(d) {
-  var dims=[
-    {num:"1",q:"能不能放心开",lv:d.SAFETY_LEVEL||"warn",lb:d.SAFETY_LABEL||"需关注",sub:d.SAFETY_SUB||"",issues:d.safety_issues||[],col2:"影响安全"},
-    {num:"2",q:"以后会不会多花钱",lv:d.COST_LEVEL||"warn",lb:d.COST_LABEL||"需注意",sub:d.COST_SUB||"",issues:d.cost_issues||[],col2:"影响养车"},
-    {num:"3",q:"以后卖会不会亏",lv:d.RESALE_LEVEL||"warn",lb:d.RESALE_LABEL||"有风险",sub:d.RESALE_SUB||"",issues:d.resale_issues||[],col2:"影响保值"},
-    {num:"4",q:"现在买贵了吗",lv:d.PRICE_LEVEL||"warn",lb:d.PRICE_LABEL||"报价偏高",sub:d.PRICE_SUB||"",issues:[],col2:""}
-  ];
-  var h="";
-  dims.forEach(function(dim, di) {
-    var badgeColor = dim.lv==="ok" ? "color:#16a34a;background:#f0fdf4" :
-                     dim.lv==="bad" ? "color:#dc2626;background:#fef2f2" :
-                     "color:#d97706;background:#fffbeb";
-    h+="<div style='background:#fff;border-radius:12px;margin-bottom:7px;overflow:hidden;'>";
-    h+="<div style='display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;'>";
-    h+="<div style='display:flex;align-items:center;gap:12px;'>";
-    h+="<div style='width:30px;height:30px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;font-weight:700;color:#374151;'>"+dim.num+"</div>";
-    h+="<div style='font-size:18px;font-weight:700;color:#111;'>"+xe(dim.q)+"</div>";
-    h+="</div>";
-    h+="<span style='font-size:13px;padding:3px 12px;border-radius:20px;white-space:nowrap;"+badgeColor+"'>"+xe(dim.lb)+"</span>";
-    h+="</div>";
-
-    if (di < 3 && dim.issues.length > 0) {
-      h+="<div style='margin:0 16px 12px;border:0.5px solid #f3f4f6;border-radius:10px;overflow:hidden;'>";
-      dim.issues.forEach(function(issue, ii) {
-        if (ii > 0) h+="<div style='height:0.5px;background:#f3f4f6;'></div>";
-        h+="<div style='padding:10px 14px;'>";
-        h+="<div style='font-size:16px;font-weight:600;color:#111;margin-bottom:9px;'>"+xe(issue.name)+"</div>";
-        h+="<div style='display:flex;gap:6px;'>";
-        var commonColor = (issue.common||"").indexOf("极少见")>=0 ? "#dc2626" :
-                          (issue.common||"").indexOf("不常见")>=0 ? "#d97706" :
-                          (issue.common||"").indexOf("很常见")>=0 ? "#16a34a" : "#9ca3af";
-        h+="<div style='flex:1;text-align:center;padding:7px 4px;background:#f9fafb;border-radius:6px;'>";
-        h+="<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>常见程度</div>";
-        h+="<div style='font-size:13px;font-weight:600;color:"+commonColor+";'>"+xe(issue.common||"")+"</div></div>";
-        var impactVal = issue.impact||"";
-        var impactColor = (impactVal.indexOf("无")>=0||impactVal.indexOf("小")>=0||impactVal.indexOf("直接")>=0) ? "#9ca3af" : (impactVal.indexOf("大")>=0||impactVal.indexOf("高")>=0||impactVal.indexOf("隐患")>=0||impactVal.indexOf("风险")>=0) ? "#dc2626" : "#d97706";
-        h+="<div style='flex:1;text-align:center;padding:7px 4px;background:#f9fafb;border-radius:6px;'>";
-        h+="<div style='font-size:11px;color:#9ca3af;margin-bottom:3px;'>"+xe(dim.col2)+"</div>";
-        h+="<div style='font-size:13px;font-weight:600;color:"+impactColor+";'>"+xe(impactVal)+"</div></div>";
-        h+="</div></div>";
-      });
-      h+="</div>";
-    } else if (di === 3) {
-      // 19.9价格维度：只引导，不显示任何价格信息
-      h+="<div style='padding:4px 16px 12px 58px;'>";
-      h+="<div style='font-size:13px;color:#9ca3af;margin-bottom:10px;'>报价有没有覆盖这辆车的折损？</div>";
-      h+="<div style='background:#fafafa;border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;'>";
-      h+="<span style='font-size:13px;color:#9ca3af;'>新车价折损拆解 + 覆盖分析</span>";
-      h+="<span style='font-size:12px;color:#d97706;font-weight:700;'>🔒 ¥99 解锁</span>";
-      h+="</div></div>";
-    } else {
-      var subText = dim.sub || "暂无识别问题";
-      h+="<div style='padding:4px 16px 14px 58px;font-size:15px;color:#9ca3af;'>"+xe(subText)+"</div>";
-    }
-    h+="</div>";
-  });
-  return h;
-}
-
-
-function fullDims(d) {
-  var dims=[
-    {num:"1",q:"能不能放心开",lv:d.SAFETY_LEVEL||"warn",lb:d.SAFETY_LABEL||"需关注",issues:d.safety_issues||[]},
-    {num:"2",q:"以后会不会多花钱",lv:d.COST_LEVEL||"warn",lb:d.COST_LABEL||"需注意",issues:d.cost_issues||[]},
-    {num:"3",q:"以后卖会不会亏",lv:d.RESALE_LEVEL||"warn",lb:d.RESALE_LABEL||"有风险",issues:d.resale_issues||[]},
-    {num:"4",q:"现在买贵了吗",lv:d.PRICE_LEVEL||"warn",lb:d.PRICE_LABEL||"报价偏高",issues:[]}
-  ];
-  var h="";
-
-  // 亮点区块：图标+pill横排
-  if (d.plus && d.plus.length > 0) {
-    h+="<div style='background:#f0fdf4;border-radius:12px;margin-bottom:8px;padding:12px 14px;border:1px solid #bbf7d0;'>";
-    h+="<div style='font-size:12px;font-weight:700;color:#15803d;margin-bottom:8px;letter-spacing:.5px;'>⭐ 这辆车的亮点</div>";
-    h+="<div style='display:flex;flex-wrap:wrap;gap:6px;'>";
-    d.plus.forEach(function(p) {
-      h+="<div style='background:#dcfce7;border-radius:8px;padding:6px 10px;font-size:12px;color:#166534;line-height:1.4;'>"+xe(p)+"</div>";
-    });
-    h+="</div></div>";
+  if (!text) {
+    alert("请输入报告");
+    return;
   }
 
-  dims.forEach(function(dim, di) {
-    var lv = dim.lv;
-    var headerBg = lv==="ok"?"#f0fdf4":lv==="bad"?"#fef2f2":"#fffbeb";
-    var headerBorder = lv==="ok"?"#bbf7d0":lv==="bad"?"#fecaca":"#fde68a";
-    var labelColor = lv==="ok"?"#15803d":lv==="bad"?"#dc2626":"#92400e";
-    var numBg = lv==="ok"?"#dcfce7":lv==="bad"?"#fee2e2":"#fef3c7";
-    var em = lv==="ok"?"✅":lv==="bad"?"❌":"⚠️";
-
-    h+="<div style='background:#fff;border-radius:12px;margin-bottom:8px;overflow:hidden;border:1px solid #f3f4f6;'>";
-
-    // 标题行带颜色背景
-    h+="<div style='display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:"+headerBg+";border-bottom:1px solid "+headerBorder+";'>";
-    h+="<div style='display:flex;align-items:center;gap:10px;'>";
-    h+="<div style='width:26px;height:26px;border-radius:50%;background:"+numBg+";display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:"+labelColor+";'>"+dim.num+"</div>";
-    h+="<span style='font-size:15px;font-weight:700;color:#111;'>"+xe(dim.q)+"</span>";
-    h+="</div>";
-    h+="<span style='font-size:13px;font-weight:700;color:"+labelColor+";'>"+em+" "+xe(dim.lb)+"</span>";
-    h+="</div>";
-
-    if (di < 3) {
-      if (dim.issues.length > 0) {
-        dim.issues.forEach(function(issue, ii) {
-          var isVeryCommon = (issue.common||"").indexOf("很常见")>=0;
-          var isGood = (issue.impact||"").indexOf("无安全")>=0||(issue.impact||"").indexOf("不影响安全")>=0||(issue.impact||"").indexOf("仅外观")>=0;
-          var isBad = (issue.impact||"").indexOf("有安全隐患")>=0||(issue.impact||"").indexOf("存在安全隐患")>=0||(issue.impact||"").indexOf("安全风险")>=0;
-          var affectsPrice = issue.covered==="uncovered";
-
-          // 很常见的小问题整行灰色淡化
-          var rowOpacity = isVeryCommon && !affectsPrice ? "opacity:0.5;" : "";
-          var dotColor = isGood?"#16a34a":isBad?"#dc2626":"#f59e0b";
-          var nameColor = isGood?"#15803d":isBad?"#dc2626":"#374151";
-
-          h+="<div style='display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #f9fafb;"+rowOpacity+"'>";
-          h+="<span style='width:7px;height:7px;border-radius:50%;background:"+dotColor+";flex-shrink:0;'></span>";
-          h+="<div style='flex:1;min-width:0;'>";
-          h+="<div style='display:flex;align-items:center;gap:6px;flex-wrap:wrap;'>";
-          h+="<span style='font-size:14px;font-weight:600;color:"+nameColor+";'>"+xe(issue.name)+"</span>";
-          if (affectsPrice) h+="<span style='font-size:10px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;padding:1px 5px;border-radius:3px;font-weight:600;'>影响售价</span>";
-          // 覆盖状态
-          if (issue.covered==="uncovered") {
-            h+="<span style='font-size:10px;color:#dc2626;background:#fef2f2;border:1px solid #fecaca;padding:1px 5px;border-radius:3px;font-weight:600;'>报价未覆盖</span>";
-          } else if (issue.covered==="covered") {
-            h+="<span style='font-size:10px;color:#16a34a;background:#f0fdf4;border:1px solid #bbf7d0;padding:1px 5px;border-radius:3px;'>已覆盖</span>";
-          }
-          h+="</div>";
-          if (issue.action) {
-            var isIgnore = issue.action.indexOf("忽略")>=0||issue.action.indexOf("无需")>=0||issue.action.indexOf("可忽略")>=0||isVeryCommon;
-            h+="<div style='font-size:12px;color:"+(isIgnore?"#9ca3af":"#92400e")+";margin-top:2px;'>"+(isIgnore?"可忽略":"→ "+xe(issue.action))+"</div>";
-          }
-          h+="</div></div>";
-        });
-      } else {
-        h+="<div style='padding:10px 14px;font-size:13px;color:#9ca3af;'>✓ 未发现明显问题</div>";
-      }
-    } else {
-      // 第4步：价格结论
-      var priceSub = d.PRICE_SUB||"";
-      var priceFrom = d.PRICE_FROM||"";
-      var deducts = d.price_deducts||[];
-      var uncovered = deducts.filter(function(x){return x.status==="uncovered";});
-
-      h+="<div style='padding:12px 14px;'>";
-      if (lv==="ok") {
-        h+="<div style='font-size:14px;color:#15803d;font-weight:600;margin-bottom:6px;'>✅ 报价合理，可以直接谈</div>";
-        if (priceSub) h+="<div style='font-size:12px;color:#6b7280;'>"+xe(priceSub)+"</div>";
-      } else {
-        h+="<div style='font-size:14px;color:#92400e;font-weight:600;margin-bottom:6px;'>有压价空间</div>";
-        if (uncovered.length > 0) {
-          h+="<div style='font-size:12px;color:#6b7280;margin-bottom:8px;'>以下问题可作为压价依据：</div>";
-          uncovered.forEach(function(item) {
-            h+="<div style='display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f3f4f6;'>";
-            h+="<span style='font-size:13px;color:#374151;'>"+xe(item.name)+"</span>";
-            h+="<span style='font-size:12px;color:#dc2626;font-weight:600;'>"+xe(item.extra||"")+"</span>";
-            h+="</div>";
-          });
-        } else if (priceSub) {
-          h+="<div style='font-size:12px;color:#6b7280;'>"+xe(priceSub)+"</div>";
-        }
-      }
-      h+="</div>";
-    }
-    h+="</div>";
+  const res = await fetch(API, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text })
   });
-  return h;
-}
 
+  const data = await res.json();
 
-function renderAll(d) {
-  var color=d.VERDICT_COLOR||"amber";
-  var verdictText=d.VERDICT||"分析完成";
-  var verdict=vi(color)+" "+xe(verdictText);
+  console.log("AI原始：", data.raw);
+  console.log("结构化：", data.data);
 
-  var fVel=document.getElementById("fV");
-  if(fVel){fVel.innerHTML=verdict;fVel.className="b1-verdict "+vc(color,verdictText);}
-  var totalIssues = (d.safety_issues||[]).length + (d.cost_issues||[]).length + (d.resale_issues||[]).length;
-  var issueCount = d.ISSUE_COUNT || (totalIssues > 0 ? String(totalIssues) : "0");
-  var fNel = document.getElementById("fN");
-  if(fNel){
-    fNel.textContent=issueCount+" 个（影响价格）";
-    fNel.className="b1-val "+(parseInt(issueCount)===0?"v-green":parseInt(issueCount)>=3?"v-red":"v-amber");
+  const R = data.data || {};
+
+  // ===== 决策 =====
+  let decision = "⚠️ 建议谨慎";
+
+  if (R.STRUCT_RISK === "STRUCT") {
+    decision = "❌ 不建议购买（结构受损）";
+  } else if ((R.PRICE_COVERED || "").includes("未覆盖")) {
+    decision = "⚠️ 可以买，但必须压价";
+  } else if ((R.PRICE_COVERED || "").includes("有捡漏")) {
+    decision = "✅ 可以入手";
   }
-  var hookEl=document.getElementById("fHook");
-  if(hookEl){hookEl.textContent=(d.VERDICT_COLOR==="red")?"❌ 建议放弃这辆车":"AI已完成车况分析，解锁查看详情";}
 
-  // 免费版三维度
-  function levelColor(lv){ return lv==="ok"?"v-green":lv==="bad"?"v-red":"v-amber"; }
-  function levelText(lv,okT,warnT,badT){ return lv==="ok"?okT:lv==="bad"?badT:warnT; }
-  var fSafetyEl=document.getElementById("fSafety");
-  if(fSafetyEl){
-    fSafetyEl.textContent=d.SAFETY_LABEL||levelText(d.SAFETY_LEVEL||"warn","安全可靠","需关注","有隐患");
-    fSafetyEl.className="b1-val "+levelColor(d.SAFETY_LEVEL||"warn");
-  }
-  var fCostEl=document.getElementById("fCost");
-  if(fCostEl){
-    fCostEl.textContent=d.COST_LABEL||levelText(d.COST_LEVEL||"warn","成本正常","有风险","偏高");
-    fCostEl.className="b1-val "+levelColor(d.COST_LEVEL||"warn");
-  }
-  var fResaleEl=document.getElementById("fResale");
-  if(fResaleEl){
-    fResaleEl.textContent=d.RESALE_LABEL||levelText(d.RESALE_LEVEL||"warn","保值正常","有风险","风险高");
-    fResaleEl.className="b1-val "+levelColor(d.RESALE_LEVEL||"warn");
-  }
-  document.getElementById("fDims").innerHTML=freeDims(d);
+  document.getElementById("decision").innerText = decision;
 
-  // 199顶部
-  document.getElementById("fullSub").textContent=d.VERDICT_SUB||"";
-  var fullFromEl=document.getElementById("fullFrom");
-  if(fullFromEl) fullFromEl.textContent=d.PRICE_FROM||"-";
-  var fullPriceEl=document.getElementById("fullPrice");
-  if(fullPriceEl){
-    fullPriceEl.textContent=d.PRICE_LABEL||"-";
-    fullPriceEl.className="b1-val "+levelColor(d.PRICE_LEVEL||"warn");
-  }
-  document.getElementById("fullDims").innerHTML=fullDims(d);
+  // ===== 事故还原 =====
+  document.getElementById("accident").innerText =
+    "→ " + (R.ACCIDENT_TYPE || "") + "（" + (R.ACCIDENT_CHAIN || "") + "）";
 
-  // 放弃条件
-  var qh="";
-  if (d.quits&&d.quits.length>0) {
-    qh="<div class='quit-card' style='margin:0 0 8px;'><div class='qt-t'>以下情况直接放弃</div>";
-    d.quits.forEach(function(q){ qh+="<div class='qt-row'>· "+xe(q)+"</div>"; });
-    qh+="</div>";
-  }
-  document.getElementById("fullQuits").innerHTML=qh;
+  // ===== 事故等级 =====
+  let level = "轻微";
 
-  // 联系顾问按钮
-  var btnContact = document.getElementById("btnContact");
-  if(btnContact) btnContact.onclick = function(){ alert("请添加微信：ailulu_car，备注【看车】"); };
+  if (R.STRUCT_RISK === "STRUCT") level = "严重事故";
+  else if (R.IMPACT_LEVEL === "HIGH") level = "较大事故";
+  else if (R.IMPACT_LEVEL === "MEDIUM") level = "中等事故";
+
+  document.getElementById("level").innerText = level;
+
+  // ===== 后遗症 =====
+  document.getElementById("risk").innerText =
+    "→ " + (R.FUTURE_RISK || "暂无");
+
+  // ===== 金额 =====
+  document.getElementById("money").innerText =
+    "→ " + (R.TOTAL_LOSS || "0");
+
+  // ===== 价格 =====
+  document.getElementById("price").innerText =
+    "→ " + (R.PRICE_COVERED || "未知");
+
+  document.getElementById("result").style.display = "block";
 }
 
-
-async function sliceImage(file, maxSliceH) {
-  return new Promise(function(resolve) {
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      var img = new Image();
-      img.onload = function() {
-        var w = img.width;
-        var h = img.height;
-        if (h <= maxSliceH * 1.5) {
-          var canvas = document.createElement("canvas");
-          var maxW = 1200;
-          var sw = w, sh = h;
-          if (sw > maxW) { sh = Math.round(sh * maxW / sw); sw = maxW; }
-          canvas.width = sw; canvas.height = sh;
-          canvas.getContext("2d").drawImage(img, 0, 0, sw, sh);
-          canvas.toBlob(function(blob) {
-            resolve([new File([blob], file.name, { type: "image/jpeg" })]);
-          }, "image/jpeg", 0.85);
-          return;
-        }
-        var slices = Math.ceil(h / maxSliceH);
-        var results = [];
-        var done = 0;
-        for (var i = 0; i < slices; i++) {
-          (function(idx) {
-            var sy = idx * maxSliceH;
-            var sh2 = Math.min(maxSliceH, h - sy);
-            var maxW2 = 1200;
-            var sw2 = w, scaledH = sh2;
-            if (sw2 > maxW2) { scaledH = Math.round(sh2 * maxW2 / sw2); sw2 = maxW2; }
-            var canvas2 = document.createElement("canvas");
-            canvas2.width = sw2; canvas2.height = scaledH;
-            canvas2.getContext("2d").drawImage(img, 0, sy, w, sh2, 0, 0, sw2, scaledH);
-            canvas2.toBlob(function(blob) {
-              results[idx] = new File([blob], "slice_" + idx + ".jpg", { type: "image/jpeg" });
-              done++;
-              if (done === slices) resolve(results);
-            }, "image/jpeg", 0.85);
-          })(i);
-        }
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-async function compressImage(file, maxSizeKB) {
-  return new Promise(function(resolve) {
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      var img = new Image();
-      img.onload = function() {
-        var canvas = document.createElement("canvas");
-        var ctx = canvas.getContext("2d");
-        var w = img.width;
-        var h = img.height;
-        // Max dimension 1200px
-        var maxDim = 1200;
-        if (w > maxDim || h > maxDim) {
-          if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
-          else { w = Math.round(w * maxDim / h); h = maxDim; }
-        }
-        canvas.width = w;
-        canvas.height = h;
-        ctx.drawImage(img, 0, 0, w, h);
-        // Start with quality 0.8, reduce until under maxSizeKB
-        var quality = 0.8;
-        var tryCompress = function() {
-          canvas.toBlob(function(blob) {
-            if (blob.size > maxSizeKB * 1024 && quality > 0.2) {
-              quality -= 0.1;
-              tryCompress();
-            } else {
-              resolve(new File([blob], file.name, { type: "image/jpeg" }));
-            }
-          }, "image/jpeg", quality);
-        };
-        tryCompress();
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-
-// 把一张图片切割成多块，每块高度不超过maxSliceH像素
-async function sliceImage(file, maxSliceH) {
-  return new Promise(function(resolve) {
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      var img = new Image();
-      img.onload = function() {
-        var w = img.width;
-        var h = img.height;
-        // 如果图片不是长图，直接压缩返回
-        if (h <= maxSliceH * 1.5) {
-          var canvas = document.createElement("canvas");
-          var maxW = 1200;
-          var sw = w, sh = h;
-          if (sw > maxW) { sh = Math.round(sh * maxW / sw); sw = maxW; }
-          canvas.width = sw; canvas.height = sh;
-          canvas.getContext("2d").drawImage(img, 0, 0, sw, sh);
-          canvas.toBlob(function(blob) {
-            resolve([new File([blob], file.name, { type: "image/jpeg" })]);
-          }, "image/jpeg", 0.85);
-          return;
-        }
-        // 长图：切成多块
-        var slices = Math.ceil(h / maxSliceH);
-        var results = [];
-        var done = 0;
-        for (var i = 0; i < slices; i++) {
-          (function(idx) {
-            var sy = idx * maxSliceH;
-            var sh = Math.min(maxSliceH, h - sy);
-            // 按宽度等比缩放，最大1200px
-            var maxW = 1200;
-            var sw = w, scaledH = sh;
-            if (sw > maxW) { scaledH = Math.round(sh * maxW / sw); sw = maxW; }
-            var canvas = document.createElement("canvas");
-            canvas.width = sw; canvas.height = scaledH;
-            canvas.getContext("2d").drawImage(img, 0, sy, w, sh, 0, 0, sw, scaledH);
-            canvas.toBlob(function(blob) {
-              results[idx] = new File([blob], file.name.replace(/\./, "_" + idx + "."), { type: "image/jpeg" });
-              done++;
-              if (done === slices) resolve(results);
-            }, "image/jpeg", 0.85);
-          })(i);
-        }
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-async function compressImage(file, maxSizeKB) {
-  return new Promise(function(resolve) {
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      var img = new Image();
-      img.onload = function() {
-        var canvas = document.createElement("canvas");
-        var ctx = canvas.getContext("2d");
-        var w = img.width; var h = img.height;
-        var maxDim = 1200;
-        if (w > maxDim || h > maxDim) {
-          if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
-          else { w = Math.round(w * maxDim / h); h = maxDim; }
-        }
-        canvas.width = w; canvas.height = h;
-        ctx.drawImage(img, 0, 0, w, h);
-        var quality = 0.8;
-        var tryCompress = function() {
-          canvas.toBlob(function(blob) {
-            if (blob.size > maxSizeKB * 1024 && quality > 0.2) {
-              quality -= 0.1; tryCompress();
-            } else {
-              resolve(new File([blob], file.name, { type: "image/jpeg" }));
-            }
-          }, "image/jpeg", quality);
-        };
-        tryCompress();
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-async function startAnalyze() {
-  var pasteText=document.getElementById("pasteText").value.trim();
-  var price=document.getElementById("priceInput").value.trim();
-  if (uploadedFiles.length===0&&pasteText.length<3) { alert("请上传验车报告图片，或粘贴报告文字内容"); return; }
-  go("p1");
-  animateSteps();
-  try {
-    var fd=new FormData();
-    if (uploadedFiles.length > 0) {
-      // 切割长图后上传，每块高度1200px
-      var allSlices = [];
-      for (var fi = 0; fi < uploadedFiles.length; fi++) {
-        var slices = await sliceImage(uploadedFiles[fi], 1200);
-        allSlices = allSlices.concat(slices);
-      }
-      allSlices.forEach(function(f, i) { fd.append("file_" + i, f); });
-    }
-    var txt=pasteText;
-    if (price) txt="当前报价："+price+"万元\n"+txt;
-    if (txt) fd.append("text",txt);
-    var resp=await fetch(API,{method:"POST",body:fd});
-    var data=await resp.json();
-    if (data.error) { alert("分析出错："+data.error); go("p0"); return; }
-    RES=parseResult(data.content||"");
-    renderAll(RES);
-    go("p2");
-  } catch(e) { alert("网络错误："+e.message); go("p0"); }
-}
 </script>
+
 </body>
 </html>
