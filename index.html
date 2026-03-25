@@ -994,9 +994,13 @@ async function startAnalyze() {
   animateSteps();
 
   try {
+    console.log("===开始分析===");
+
     var fd = new FormData();
 
     if (uploadedFiles.length > 0) {
+      console.log("图片数量:", uploadedFiles.length);
+
       var allSlices = [];
       for (var fi = 0; fi < uploadedFiles.length; fi++) {
         var slices = await sliceImage(uploadedFiles[fi], 1200);
@@ -1005,20 +1009,33 @@ async function startAnalyze() {
       allSlices.forEach(function(f, i) {
         fd.append("file_" + i, f);
       });
+
+      console.log("切片后图片数量:", allSlices.length);
     }
 
     var txt = pasteText;
     if (price) {
       txt = "当前报价：" + price + "万元\n" + txt;
     }
-    if (txt) fd.append("text", txt);
+    if (txt) {
+      fd.append("text", txt);
+      console.log("文本内容:", txt);
+    }
+
+    console.log("API地址:", API);
+    console.log("准备发送请求");
 
     var resp = await fetch(API, {
       method: "POST",
       body: fd
     });
 
+    console.log("HTTP状态:", resp.status);
+
     var data = await resp.json();
+
+    console.log("返回数据:", data);
+    console.log("返回content:", data.content);
 
     if (data.error) {
       alert("分析出错：" + data.error);
@@ -1027,17 +1044,23 @@ async function startAnalyze() {
     }
 
     RES = parseResult(data.content || "");
+
+    console.log("解析结果:", RES);
+
     renderAll(RES);
 
     var buyDecision = RES.BUY_DECISION || RES.VERDICT || "";
+    console.log("最终决策:", buyDecision);
+
     if (buyDecision.indexOf("不建议") >= 0 || buyDecision.indexOf("放弃") >= 0 || RES.VERDICT_COLOR === "red") {
       go("p2quit");
     } else {
       go("p2");
     }
+
   } catch (e) {
+    console.error("报错了:", e);
     alert("网络错误：" + e.message);
     go("p0");
   }
 }
-</script>
